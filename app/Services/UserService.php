@@ -104,26 +104,6 @@ class UserService
 
         return ['user' => $user , 'message' => $message , 'code' => $code];}
 
-        ///////////////////////////
-             public function otpCode($email): array{
-
-              //Delete all old code user send before
-              ResetCodePassword::query()->where('email' , $email)->delete();
-               $data['email'] =  $request['email'];
-              //generate random code
-                $data['code'] = mt_rand(100000, 999999);
-
-                $data['role'] = User::query()->firstWhere('email' , $email)->role_id;
-                //Create a new code
-                $codeData = ResetCodePassword::query()->create($data);
-
-                //Send email to user
-                Mail::to($email)->send(new SendCodeResetPassword($codeData['code']));
-
-                $message = 'code sent';
-                $code = 200;
-            return ['user' => $data , 'message' => $message , 'code' => $code];}
-       ////////////////////////////
 
     
      public function forgotPassword($request): array{
