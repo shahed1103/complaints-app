@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ComplaintsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,4 +37,10 @@ Route::post('userResetPassword/{code}' , 'userResetPassword')
 ->name('user.password.reset');
 
 Route::middleware('auth:sanctum')->get('logout', [AuthController::class, 'logout'])->name('user.logout');
+});
+
+
+Route::controller(ComplaintsController::class)->group(function(){
+    Route::post('addComplaint' , 'addComplaint')
+    ->name('user.add.complaint');
 });

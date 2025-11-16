@@ -19,5 +19,17 @@ class DatabaseSeeder extends Seeder
             RolesPermissionsSeeder::class,
             ]);
 
+        $this->call([
+            ComplaintDepartmentSeeder::class,
+            ]);
+
+        $this->call([
+            ComplaintStatusSeeder::class,
+            ]);
+
+        $this->call([
+            ComplaintTypeSeeder::class,
+            ]);
+
         }
 }

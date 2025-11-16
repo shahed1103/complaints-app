@@ -64,62 +64,7 @@ use HasApiTokens, HasFactory, Notifiable , HasRoles;
         return $this->hasMany(Notification::class);
     }
 
-
-    public function indCampaigns()
-    {
-        return $this->hasMany(IndCompaign::class);
-    }
-
-    public function donations()
-    {
-    return $this->hasMany(Donation::class);
-    }
-
-
-    public function donationAssociationCampaigns()
-    {
-    return $this->hasMany(DonationAssociationCampaign::class);
-    }
-
-    public function city()
-    {
-        return $this->belongsTo(City::class);
-    }
-
-    public function gender()
-    {
-        return $this->belongsTo(Gender::class);
-    }
-
-    public function volunteerProfile()
-    {
-    return $this->hasOne(VolunteerProfile::class , 'user_id');
-    }
-
-        public function associations()
-    {
-        return $this->hasMany(Association::class, 'user_id');
-    }
-
-    public function wallet()
-    {
-        return $this->hasOne(Wallet::class);
-    }
-
-    public function addedInkindDonations() {
-    return $this->hasMany(InkindDonation::class, 'owner_id');
-    }
-
-    public function reservedInkindDonations() {
-        return $this->belongsToMany(
-            InkindDonation::class,
-            'inkind_donation_reservations',
-            'user_id',
-            'inkind_donation_id'
-        );
-    }
-
-    public function reservations() {
-        return $this->hasMany(InkindDonationReservation::class, 'user_id');
+    public function complaints(){
+        return $this->hasMany(Complaint::class);
     }
 }
