@@ -6,8 +6,7 @@ use Storage;
 use Illuminate\Http\Request;
 use App\Http\Responses\response;
 use App\Services\ComplaintWebService;
-// use App\Http\Requests\Complaint\AddComplaintRequest;
-
+use App\Http\Requests\Complaint\EditComplaintStatusRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -21,17 +20,59 @@ class ComplaintsWebController extends Controller
         $this->complaintWebService = $complaintWebService;
     }
 
-    // // add new complaint
-    // public function addComplaint(): JsonResponse {
-    //     $data = [] ;
-    //     try{
-    //         $data = $this->complaintWebService->addComplaint($request);
-    //        return Response::Success($data['complaint'], $data['message']);
-    //     }
-    //     catch(Throwable $th){
-    //         $message = $th->getMessage();
-    //         $errors [] = $message;
-    //         return Response::Error($data , $message , $errors);
-    //     }
-    // }
+    // show complaints for spicific employee departmemt
+    public function viewComplaintsEmployeeDepartmemt(): JsonResponse{
+        $data = [] ;
+        try{
+            $data = $this->complaintWebService->viewComplaintsEmployeeDepartmemt();
+           return Response::Success($data['complaints'], $data['message']);
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            return Response::Error($data , $message , $errors);
+        }
+    }
+
+    // show complaint details for spicific employee departmemt
+    public function viewComplaintDetailsEmployeeDepartmemt($complaintId): JsonResponse{
+        $data = [] ;
+        try{
+            $data = $this->complaintWebService->viewComplaintDetailsEmployeeDepartmemt($complaintId);
+           return Response::Success($data['complaint'], $data['message']);
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            return Response::Error($data , $message , $errors);
+        }
+    }
+
+    // edit complaint status 
+    public function editComplaintStatus(EditComplaintStatusRequest $request , $complaintId): JsonResponse{
+        $data = [] ;
+        try{
+            $data = $this->complaintWebService->editComplaintStatus($request , $complaintId);
+           return Response::Success($data['complaint'], $data['message']);
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            return Response::Error($data , $message , $errors);
+        }
+    }
+
+        // add notes about complaint 
+        public function addNotesAboutComplaint($request , $complaintId): JsonResponse{
+        $data = [] ;
+        try{
+            $data = $this->complaintWebService->addNotesAboutComplaint($request , $complaintId);
+           return Response::Success($data['note'], $data['message']);
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            return Response::Error($data , $message , $errors);
+        }
+    }
 }

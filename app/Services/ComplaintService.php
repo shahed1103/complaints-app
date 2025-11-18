@@ -23,7 +23,7 @@ class ComplaintService
 
             $newComplaint = Complaint::create([
                 'complaint_type_id' => $request['complaint_type_id'],
-                'user_id' => $user->id,
+                'user_id' => 2,
                 'complaint_department_id' => $request['complaint_department_id'],
                 'complaint_status_id' => 1,
                 'problem_description' => $request['problem_description'],
@@ -60,6 +60,7 @@ class ComplaintService
 
             foreach ($complaints as $complaint) {
                 $complaint_det [] = [
+                    'id' => $complaint['id'],
                     'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
                     'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
                     'location' => $complaint['location'],
@@ -73,7 +74,6 @@ class ComplaintService
 
         // show complaint details
         public function viewComplaintDetails($complaintId): array{
-            $user = Auth::user();
             $complaint =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus' , 'complaintAttachments')->find($complaintId);
 
             $attachments = [] ;

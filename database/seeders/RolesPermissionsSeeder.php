@@ -6,6 +6,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Models\Employee;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
 use Storage;
@@ -23,7 +24,7 @@ class RolesPermissionsSeeder extends Seeder
         $EmployeeRole = Role::create(['name' => 'Employee']);
 
         // 2. Create permissions
-        $permissions = [ ];
+        $permissions = ['register'];
 
         foreach ($permissions as $permissionName) {
             Permission::findOrCreate($permissionName, 'web');
@@ -32,9 +33,9 @@ class RolesPermissionsSeeder extends Seeder
       //assign permissions to roles
         // 3. Assign permissions
 
-        $AdminRole->syncPermissions([]);
-        $ClientRole->syncPermissions([]);
-        $EmployeeRole->syncPermissions([]);
+        $AdminRole->syncPermissions([$permissions]);
+        $ClientRole->syncPermissions([$permissions]);
+        $EmployeeRole->syncPermissions([$permissions]);
 
 
 $sourcePath = public_path('uploads/seeder_photos/defualtProfilePhoto.png');
@@ -98,6 +99,10 @@ $employee->assignRole($EmployeeRole);
 $permissions = $EmployeeRole->permissions()->pluck('name')->toArray();
 $employee->givePermissionTo($permissions);
 
-
+      $admin = Employee::query()->create([
+        'name' => $employee['name'],
+        'complaint_department_id' =>  1,
+        'user_id' => $employee['id']
+       ]);
     }
 }

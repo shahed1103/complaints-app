@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('complaints', function (Blueprint $table) {
+        Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('complaint_type_id')->constrained('complaint_types')->onDelete('cascade');
+            $table->string('name');
             $table->foreignId('complaint_department_id')->constrained('complaint_departments')->onDelete('cascade');
-            $table->foreignId('complaint_status_id')->constrained('complaint_statuses')->onDelete('cascade');
-            $table->string('problem_description');
-            $table->string('location');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('complaints');
+        Schema::dropIfExists('employees');
     }
 };

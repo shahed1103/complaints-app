@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintsController;
+use App\Http\Controllers\ComplaintsWebController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -49,4 +51,19 @@ Route::controller(ComplaintsController::class)->group(function(){
 
     Route::get('viewComplaintDetails/{complaintId}' , 'viewComplaintDetails')
     ->name('user.view.Complaint.details');
+});
+
+Route::controller(ComplaintsWebController::class)->group(function(){
+    Route::get('viewComplaintsEmployeeDepartmemt' , 'viewComplaintsEmployeeDepartmemt')
+    ->name('employee.view.departmemt.Complaints');
+
+    Route::get('viewComplaintDetailsEmployeeDepartmemt/{complaintId}' , 'viewComplaintDetailsEmployeeDepartmemt')
+    ->name('employee.view.departmemt.Complaint.details');
+
+    Route::post('editComplaintStatus/{complaintId}' , 'editComplaintStatus')
+    ->name('employee.edit.complaint.status');
+
+    Route::post('addNotesAboutComplaint/{complaintId}' , 'addNotesAboutComplaint')
+    ->name('employee.add.notes.about.complaint');
+    
 });

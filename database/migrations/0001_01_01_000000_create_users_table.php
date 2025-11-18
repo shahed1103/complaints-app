@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('photo')->nullable();
             $table->integer('points')->nullable()->default(0);
             $table->integer('gender_id')->unsigned()->nullable();
+            $table->string('otp_code')->nullable();     
+            $table->timestamp('otp_expires_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

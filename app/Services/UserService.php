@@ -35,20 +35,32 @@ class UserService
          $sourcePath = 'uploads/seeder_photos/defualtProfilePhoto.png';
          $targetPath = 'uploads/det/defualtProfilePhoto.png';
 
-    Storage::disk('public')->put($targetPath, File::get($sourcePath));
+        Storage::disk('public')->put($targetPath, File::get($sourcePath));
+        if (empty($request['phone']) && empty($request['email'])) {
+            throw new Exception("You must enter phone number or email.", 401 );
+        }
 
-              $user = User::query()->create([
-     'role_id' =>  $clientRole,
-     'name' => $request['name'],
-     'email' => $request['email'],
-     'password' => Hash::make($request['password']),
-    //  'gender_id' => $request['gender_id'] ?? 0,
-    //  'phone' => $request['phone'] ?? 0,
-     'phone' => $request['phone'] ,
-    //  'nationality_id' => $request['nationality_id'] ?? 0,
-    //  'age' => $request['age'] ?? 0 ,
-    'photo' => url(Storage::url($targetPath))
+        $otp = rand(100000, 999999);
+
+        $user = User::query()->create([
+            'role_id' =>  $clientRole,
+            'name' => $request['name'],
+            'email' => $request['email'] ?? null,
+            'password' => Hash::make($request['password']),
+            'phone' => $request['phone'] ?? null,
+            'photo' => url(Storage::url($targetPath)),
+            'otp_code' => $otp,
+            'otp_expires_at' => now()->addMinutes(5),
         ]);
+
+        if ($user->phone) {
+            // $this->sendSmsOtp($user->phone, $otp);
+        } else {
+            // Mail::to($request['email'])->send($otp);
+                    Mail::raw("Your OTP code is: $otp", function ($message) use ($request) {
+            $message->to($request['email'])->subject('OTP Verification');
+        });
+        }
 
         $clientRole = Role::query()->where('name', 'Client')->first();
         $user->assignRole($clientRole);
@@ -59,14 +71,16 @@ class UserService
         $user->load('roles' , 'permissions');
 
         $user = User::query()->find($user['id']);
+
         $user = $this->appendRolesAndPermissions($user);
-        $user['token'] = $user->createToken("token")->plainTextToken;
+        // $user['token'] = $user->createToken("token")->plainTextToken;
 
         $message = 'User created successfully';
 
-  return ['user' => $user , 'message' => $message];}
+        return ['user' => $Permission , 'message' => $message];
+    }
 
-//////////////////////////////
+
     public function signin($request): array{
      $user = User::query()->where('email',$request['email'])->first();
      if (!is_null($user)){
@@ -74,58 +88,19 @@ class UserService
         throw new Exception("User email & password does not with our record.", 401 );
         }
 
-        // else {
-        //     $user = $this->appendRolesAndPermissions($user);
-        //     $user['token'] = $user->createToken("token")->plainTextToken;
-        //     $message = 'User logged in successfully';
-        //     $code = 200;
-        // }
-
-        $otp = mt_rand(100000, 999999);
-        $data = [
-            'user_id' => $user->id,
-            'otp' => $otp,
-            'expires_at' => now()->addMinutes(5)
-        ];
-        $codeData = UserOtp::query()->create($data);
-
-        Mail::to($request['email'])->send(new SendCodeResetPassword($codeData['code']));
-        $code = 200;
-
+        else {
+            $user = $this->appendRolesAndPermissions($user);
+            $user['token'] = $user->createToken("token")->plainTextToken;
+            $message = 'User logged in successfully';
+            $code = 200;
+        }
      }
      else {
         throw new Exception("User not found.",  404);
      }
 
-     return ['user' => $user , 'message' => $message , 'code' => $code];
+     return ['user' => $Permission , 'message' => $message , 'code' => $code];
     }
-
-    public function verifyOtp($request): array {
-        $userOtp = UserOtp::query()
-            ->where('user_id', $request['user_id'])
-            ->where('otp', $request['otp'])
-            ->first();
-
-        if (!$userOtp) {
-            throw new Exception("Invalid OTP", 422);
-        }
-
-        if ($userOtp->expires_at < now()) {
-            $userOtp->delete();
-            throw new Exception("OTP expired", 422);
-        }
-
-        $user = User::find($request['user_id']);
-        $userOtp->delete();
-
-        // Create token after OTP verification
-        $user['token'] = $user->createToken("token")->plainTextToken;
-        $user = $this->appendRolesAndPermissions($user);
-
-        return ['user' => $user, 'message' => 'Login successful', 'code' => 200];
-    }
-
-//////////////////////////////
 
     public function logout(): array{
         $user = Auth::user();
@@ -181,24 +156,12 @@ class UserService
                 $verifyCode['code'] = $passwordReset['code'];
 
                $message = 'code_is_valid';
-              //  $verifyCode = $passwordReset['code'];
-                $code = 200;
-
-                // $_SESSION['stored_verify_code'] = $verifyCode;
-                //Session::push('stored_verify_code', $verifyCode );
+               $code = 200;
 
                 return ['verifyCode' => $verifyCode , 'message' => $message , 'code' => $code];
             }
 
             public function resetPassword($request , $codeR) : array{
-
-     // $storedVerifyCode = Session::get('stored_verify_code');
-               //$storedVerifyCode = $_SESSION['stored_verify_code'];
-
-    // if (!$storedVerifyCode) {
-    //     throw new Exception("No verification code found in session", 422);
-    // }
-
                 //find the code
                 $passwordReset = ResetCodePassword::query()->firstWhere('code' , $codeR);
                 // check if it is not expired: the time is one hour

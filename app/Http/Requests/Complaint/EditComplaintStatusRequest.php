@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\Complaint;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
@@ -8,7 +8,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Responses\response;
 
-class UserSignupRequest extends FormRequest
+class EditComplaintStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,23 +21,20 @@ class UserSignupRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'email' => 'nullable|email|unique:users,email',
-            'name' => 'required|string|min:3',
-            'password' => 'required|confirmed|min:8',
-            'phone' => 'nullable|string|max:20|unique:users'
+        'complaint_status_id' => 'required|exists:complaint_statuses,id',
         ];
     }
 
     protected function failedValidation(Validator $validator){
 
-        //Throw a ValidationException with the translated error messages
+        //Throw a validationexception eith the translated error messages
         $message = "you have sent invalid data";
 
-        throw new ValidationException($validator, Response::Validation([], $message , $validator->errors()));
+        throw new ValidationException($validator, Response::Validation([],$message, $validator->errors()));
     }
 }
