@@ -29,7 +29,8 @@ use HasApiTokens, HasFactory, Notifiable , HasRoles;
         'age',
         'photo',
         'otp_code',
-        'otp_expires_at'
+        'otp_expires_at',
+        'is_verified'
     ];
 
     /* The attributes that should be hidden for serialization.

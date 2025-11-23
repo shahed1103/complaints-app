@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->integer('role_id')->unsigned();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
+            $table->string('email')->unique()->nullable();
+            $table->string('phone')->unique()->nullable();
             $table->string('password');
             $table->integer('city_id')->unsigned()->nullable();
             $table->string('age')->nullable();
@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('gender_id')->unsigned()->nullable();
             $table->string('otp_code')->nullable();     
             $table->timestamp('otp_expires_at')->nullable();
+            $table->boolean('is_verified')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

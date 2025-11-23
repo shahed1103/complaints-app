@@ -23,7 +23,7 @@ class ComplaintService
 
             $newComplaint = Complaint::create([
                 'complaint_type_id' => $request['complaint_type_id'],
-                'user_id' => 2,
+                'user_id' => $user->id,
                 'complaint_department_id' => $request['complaint_department_id'],
                 'complaint_status_id' => 1,
                 'problem_description' => $request['problem_description'],

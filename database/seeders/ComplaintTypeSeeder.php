@@ -13,7 +13,7 @@ class ComplaintTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        $status = ['Under review' , 'Approved' , 'Rejected'];
+        $status = ['طلب تسجيل' , 'خطأ فاتورة' , 'عطل فني'];
 
         for ($i=0; $i < 3 ; $i++) {
             ComplaintType::query()->create([

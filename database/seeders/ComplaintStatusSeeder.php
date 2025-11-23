@@ -13,9 +13,9 @@ class ComplaintStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        $status = ['Under review' , 'Approved' , 'Rejected'];
+        $status = ['جديدة' , 'قيد المعالجة' , 'منجزة' , 'مرفوضة'];
 
-        for ($i=0; $i < 3 ; $i++) {
+        for ($i=0; $i < 4 ; $i++) {
             ComplaintStatus::query()->create([
            'status' => $status[$i] ,
             ]); }

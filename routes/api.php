@@ -26,14 +26,20 @@ Route::controller(AuthController::class)->group(function(){
     Route::post('register' , 'register')
           ->name('user.register');
 
+    Route::post('checkOtpCode/{userID}' , 'checkOtpCode')
+    ->name('user.otp.code.check');
+
     Route::post('signin' , 'signin')
     ->name('user.signin');
 
+    Route::post('resendOtp' , 'resendOtp')
+    ->name('user.resendOtp');
+    
     Route::post('userForgotPassword' , 'userForgotPassword')
     ->name('user.password.email');
 
-Route::post('userCheckCode' , 'userCheckCode')
-->name('user.password.code.check');
+    Route::post('userCheckCode' , 'userCheckCode')
+    ->name('user.password.code.check');
 
 Route::post('userResetPassword/{code}' , 'userResetPassword')
 ->name('user.password.reset');
@@ -41,29 +47,37 @@ Route::post('userResetPassword/{code}' , 'userResetPassword')
 Route::middleware('auth:sanctum')->get('logout', [AuthController::class, 'logout'])->name('user.logout');
 });
 
+Route::middleware('auth:sanctum')->controller(ComplaintsController::class)->group(function () {
 
-Route::controller(ComplaintsController::class)->group(function(){
     Route::post('addComplaint' , 'addComplaint')
-    ->name('user.add.complaint');
+    ->name('user.add.complaint')
+    ->middleware('can:addComplaint');
 
     Route::get('viewMyComplaints' , 'viewMyComplaints')
-    ->name('user.view.Complaints');
+    ->name('user.view.Complaints')   
+    ->middleware('can:viewMyComplaints');
 
     Route::get('viewComplaintDetails/{complaintId}' , 'viewComplaintDetails')
-    ->name('user.view.Complaint.details');
+    ->name('user.view.Complaint.details')        
+    ->middleware('can:viewComplaintDetails');
+
 });
 
-Route::controller(ComplaintsWebController::class)->group(function(){
+Route::middleware('auth:sanctum')->controller(ComplaintsWebController::class)->group(function () {
     Route::get('viewComplaintsEmployeeDepartmemt' , 'viewComplaintsEmployeeDepartmemt')
-    ->name('employee.view.departmemt.Complaints');
+    ->name('employee.view.departmemt.Complaints')    
+    ->middleware('can:viewComplaintsEmployeeDepartmemt');
 
     Route::get('viewComplaintDetailsEmployeeDepartmemt/{complaintId}' , 'viewComplaintDetailsEmployeeDepartmemt')
-    ->name('employee.view.departmemt.Complaint.details');
+    ->name('employee.view.departmemt.Complaint.details')    
+    ->middleware('can:viewComplaintDetailsEmployeeDepartmemt');
 
     Route::post('editComplaintStatus/{complaintId}' , 'editComplaintStatus')
-    ->name('employee.edit.complaint.status');
+    ->name('employee.edit.complaint.status')    
+    ->middleware('can:editComplaintStatus');
 
     Route::post('addNotesAboutComplaint/{complaintId}' , 'addNotesAboutComplaint')
-    ->name('employee.add.notes.about.complaint');
+    ->name('employee.add.notes.about.complaint')    
+    ->middleware('can:addNotesAboutComplaint');
     
 });

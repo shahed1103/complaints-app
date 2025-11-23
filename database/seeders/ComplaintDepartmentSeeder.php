@@ -13,7 +13,7 @@ class ComplaintDepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $status = ['Under review' , 'Approved' , 'Rejected'];
+        $status = ['المؤسسة العامة للكهرباء' , 'المؤسسة العامة لمياه ' , 'المؤسسة العامة للاتصالات'];
 
         for ($i=0; $i < 3 ; $i++) {
             ComplaintDepartment::query()->create([

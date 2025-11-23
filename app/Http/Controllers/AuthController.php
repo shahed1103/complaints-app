@@ -8,7 +8,9 @@ use App\Http\Requests\Auth\UserSigninRequest;
 use App\Http\Requests\Auth\UserSignupRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\CheckCodeRequest;
+use App\Http\Requests\Auth\CheckOtpCodeRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\ResendOtpRequest;
 use App\Http\Responses\response;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +34,7 @@ class AuthController extends Controller
     public function register(UserSignupRequest $request): JsonResponse {
         $data = [] ;
         try{
-            $data = $this->userService->register($request->validated(),$request );
+            $data = $this->userService->register($request);
             return Response::Success($data['user'], $data['message']);
         }
         catch(Throwable $th){
@@ -42,6 +44,19 @@ class AuthController extends Controller
         }
     }
 
+    public function checkOtpCode(CheckOtpCodeRequest $request , $userID): JsonResponse {
+        $data = [] ;
+        try{
+            $data = $this->userService->checkOtpCode($request , $userID);
+            return Response::Success($data['verifyCode'], $data['message'], $data['code']);
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code );        }
+    }
+    
     public function signin(UserSigninRequest $request): JsonResponse {
         $data = [] ;
        try{
@@ -54,6 +69,20 @@ class AuthController extends Controller
             $code = $th->getCode();
             return Response::ErrorX($data , $message , $errors , $code );
         }
+    }
+
+    public function resendOtp(ResendOtpRequest $request){
+        $data = [] ;
+       try{
+            $data = $this->userService->resendOtp($request);
+            return Response::Success($data['user'], $data['message'], $data['code']);
+       }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message ;
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code );
+        }    
     }
 
     public function logout(): JsonResponse {

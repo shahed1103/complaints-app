@@ -26,10 +26,11 @@ class UserSignupRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => 'nullable|email|unique:users,email',
+            'emailOrPhone' => 'required',
+            // 'email' => 'nullable|email|unique:users,email',
             'name' => 'required|string|min:3',
             'password' => 'required|confirmed|min:8',
-            'phone' => 'nullable|string|max:20|unique:users'
+            // 'phone' => 'nullable|string|max:20|unique:users'
         ];
     }
 

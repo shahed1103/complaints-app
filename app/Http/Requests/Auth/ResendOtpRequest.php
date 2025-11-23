@@ -4,11 +4,11 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
-use App\Http\Responses\response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Responses\response;
 
-class ResetPasswordRequest extends FormRequest
+class ResendOtpRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'password' => ['required' , 'confirmed']
+            'emailOrPhone' => 'required',
         ];
     }
 
@@ -35,6 +35,6 @@ class ResetPasswordRequest extends FormRequest
         //Throw a validationexception eith the translated error messages
         $message = "you have sent invalid data";
 
-        throw new ValidationException($validator, Response::Validation([], $message , $validator->errors()));
+        throw new ValidationException($validator, Response::Validation([],$message, $validator->errors()));
     }
 }

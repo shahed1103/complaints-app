@@ -63,7 +63,7 @@ class ComplaintsWebController extends Controller
     }
 
         // add notes about complaint 
-        public function addNotesAboutComplaint($request , $complaintId): JsonResponse{
+        public function addNotesAboutComplaint(Request $request , $complaintId): JsonResponse{
         $data = [] ;
         try{
             $data = $this->complaintWebService->addNotesAboutComplaint($request , $complaintId);

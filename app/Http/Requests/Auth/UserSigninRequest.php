@@ -26,7 +26,7 @@ class UserSigninRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email|exists:users,email',
+            'emailOrPhone' => 'required',
             'password' => 'required'
         ];
     }

@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Complaint;
 use App\Models\Employee;
+use App\Models\Note;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -19,7 +20,7 @@ class ComplaintWebService
         // show complaints for spicific employee departmemt
         public function viewComplaintsEmployeeDepartmemt(): array{
             $user = Auth::user();
-            $department = Employee::where('user_id' , 3)->value('complaint_department_id');
+            $department = Employee::where('user_id' , $user->id)->value('complaint_department_id');
             $complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('complaint_department_id' , $department)->get();
 
             $complaint_det = [];
@@ -69,7 +70,7 @@ class ComplaintWebService
             $complaint =  Complaint::find($complaintId);
 
               $complaint['complaint_status_id']	= $request['complaint_status_id'];
-
+              $complaint->save();
              $message = 'complaint details for spicific employee departmemt are retrived succesfully';
              return ['complaint' => $complaint , 'message' => $message];        
         }

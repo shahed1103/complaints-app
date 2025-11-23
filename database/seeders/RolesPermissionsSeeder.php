@@ -24,7 +24,11 @@ class RolesPermissionsSeeder extends Seeder
         $EmployeeRole = Role::create(['name' => 'Employee']);
 
         // 2. Create permissions
-        $permissions = ['register'];
+        $permissions = ['register' , 'checkOtpCode' , 'signin' , 'resendOtp' ,
+                        'userForgotPassword' , 'userCheckCode' , 'userResetPassword',
+                        'logout' , 'addComplaint' , 'viewMyComplaints' , 'viewComplaintDetails' ,
+                        'viewComplaintsEmployeeDepartmemt' , 'viewComplaintDetailsEmployeeDepartmemt' , 'editComplaintStatus' ,
+                        'addNotesAboutComplaint'];
 
         foreach ($permissions as $permissionName) {
             Permission::findOrCreate($permissionName, 'web');
@@ -34,8 +38,9 @@ class RolesPermissionsSeeder extends Seeder
         // 3. Assign permissions
 
         $AdminRole->syncPermissions([$permissions]);
-        $ClientRole->syncPermissions([$permissions]);
-        $EmployeeRole->syncPermissions([$permissions]);
+        $ClientRole->syncPermissions(['addComplaint' , 'viewMyComplaints' , 'viewComplaintDetails']);
+        $EmployeeRole->syncPermissions(['viewComplaintsEmployeeDepartmemt' , 'viewComplaintDetailsEmployeeDepartmemt' ,
+                                        'editComplaintStatus' , 'addNotesAboutComplaint' ]);
 
 
 $sourcePath = public_path('uploads/seeder_photos/defualtProfilePhoto.png');
@@ -53,7 +58,8 @@ $admin = User::factory()->create([
     'name' => 'admin',
     'email' => 'admin@example.com',
     'password' => bcrypt('password'),
-    'photo' => url(Storage::url($targetPath))
+    'photo' => url(Storage::url($targetPath)),
+    'is_verified' => true
 ]);
 
 $admin->assignRole($AdminRole);
@@ -71,7 +77,8 @@ $clientUser = User::factory()->create([
     'name' => 'Client',
     'email' => 'Client@example.com',
     'password' => bcrypt('password') ,
-    'photo' => url(Storage::url($targetPath))
+    'photo' => url(Storage::url($targetPath)),
+    'is_verified' => true
 ]);
 
 
@@ -84,13 +91,14 @@ $clientUser->givePermissionTo($permissions);
 $employee = User::factory()->create([
     'role_id' => $EmployeeRole->id,
     'gender_id' => 1,
-    'phone' => '0954411753',
+    'phone' => '0954411754',
     'city_id' => 1,
     'age' => '20',
     'name' => 'employee',
     'email' => 'employee@example.com',
     'password' => bcrypt('password') ,
-    'photo' => url(Storage::url($targetPath))
+    'photo' => url(Storage::url($targetPath)),
+    'is_verified' => true
 ]);
 
 
@@ -101,7 +109,7 @@ $employee->givePermissionTo($permissions);
 
       $admin = Employee::query()->create([
         'name' => $employee['name'],
-        'complaint_department_id' =>  1,
+        'complaint_department_id' => 1,
         'user_id' => $employee['id']
        ]);
     }
