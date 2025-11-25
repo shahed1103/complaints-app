@@ -40,7 +40,8 @@ class AuthController extends Controller
         catch(Throwable $th){
             $message = $th->getMessage();
             $errors [] = $message;
-            return Response::Error($data , $message , $errors);
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code); 
         }
     }
 
@@ -54,7 +55,8 @@ class AuthController extends Controller
             $message = $th->getMessage();
             $errors [] = $message;
             $code = $th->getCode();
-            return Response::ErrorX($data , $message , $errors , $code );        }
+            return Response::ErrorX($data , $message , $errors , $code );        
+        }
     }
     
     public function signin(UserSigninRequest $request): JsonResponse {
@@ -71,10 +73,10 @@ class AuthController extends Controller
         }
     }
 
-    public function resendOtp(ResendOtpRequest $request){
+    public function resendOtp($userId){
         $data = [] ;
        try{
-            $data = $this->userService->resendOtp($request);
+            $data = $this->userService->resendOtp($userId);
             return Response::Success($data['user'], $data['message'], $data['code']);
        }
         catch(Throwable $th){

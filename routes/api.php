@@ -32,7 +32,7 @@ Route::controller(AuthController::class)->group(function(){
     Route::post('signin' , 'signin')
     ->name('user.signin');
 
-    Route::post('resendOtp' , 'resendOtp')
+    Route::get('resendOtp/{userId}' , 'resendOtp')
     ->name('user.resendOtp');
     
     Route::post('userForgotPassword' , 'userForgotPassword')
@@ -47,8 +47,16 @@ Route::post('userResetPassword/{code}' , 'userResetPassword')
 Route::middleware('auth:sanctum')->get('logout', [AuthController::class, 'logout'])->name('user.logout');
 });
 
-Route::middleware('auth:sanctum')->controller(ComplaintsController::class)->group(function () {
+Route::controller(ComplaintsController::class)->group(function () {
 
+    Route::get('getComplaintDepartment' , 'getComplaintDepartment')
+    ->name('all.getComplaintDepartment');
+
+    Route::get('getComplaintType' , 'getComplaintType')
+    ->name('all.getComplaintType');
+});
+
+Route::middleware('auth:sanctum')->controller(ComplaintsController::class)->group(function () {
     Route::post('addComplaint' , 'addComplaint')
     ->name('user.add.complaint')
     ->middleware('can:addComplaint');

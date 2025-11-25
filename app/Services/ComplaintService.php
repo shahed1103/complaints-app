@@ -6,6 +6,10 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Complaint;
 use App\Models\ComplaintAttachment;
+use App\Models\ComplaintDepartment;
+
+use App\Models\ComplaintType;
+
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -97,4 +101,26 @@ class ComplaintService
              $message = 'complaint details are retrived succesfully';
              return ['complaint' => $complaint_det , 'message' => $message];
         }
+
+            //3 view all cities
+    public function getComplaintDepartment():array{
+        $cities = ComplaintDepartment::all();
+        foreach ($cities as $city) {
+            $cities_name [] = ['id' => $city->id  , 'department_name' => $city->department_name];
+        }
+        $message = 'all cities are retrived successfully';
+
+        return ['cities' =>  $cities_name , 'message' => $message];
+     }
+
+    //4 view all genders
+    public function getComplaintType():array{
+        $gender = ComplaintType::all();
+        foreach ($gender as $gen) {
+            $gender_name [] = ['id' => $gen->id  , 'type' => $gen->type];
+        }
+        $message = 'all genders are retrived successfully';
+
+        return ['gender' =>  $gender_name , 'message' => $message];
+     }
 }

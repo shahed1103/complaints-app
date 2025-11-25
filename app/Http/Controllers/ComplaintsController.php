@@ -63,4 +63,32 @@ class ComplaintsController extends Controller
         }
     }
 
+        //3 view all cities
+    public function getComplaintDepartment(): JsonResponse {
+        $data = [] ;
+        try{
+            $data = $this->complaintService->getComplaintDepartment();
+           return Response::Success($data['cities'], $data['message']);
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            return Response::Error($data , $message , $errors);
+        }
+    }
+
+    //4 view all genders
+    public function getComplaintType(): JsonResponse {
+        $data = [] ;
+        try{
+            $data = $this->complaintService->getComplaintType();
+           return Response::Success($data['gender'], $data['message']);
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            return Response::Error($data , $message , $errors);
+        }
+    }
+
 }

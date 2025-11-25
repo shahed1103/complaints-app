@@ -160,16 +160,18 @@ class UserService
      return ['user' => $user , 'message' => $message , 'code' => $code];
     }
 
-    public function resendOtp($request){
-        if (filter_var($request['emailOrPhone'], FILTER_VALIDATE_EMAIL)) {
-            $user = User::where('email', $request['emailOrPhone'])->first();
-        } else{
-            $user = User::where('phone', $request['emailOrPhone'])->first();
-        }
+    public function resendOtp($userId){
+        // if (filter_var($request['emailOrPhone'], FILTER_VALIDATE_EMAIL)) {
+        //     $user = User::where('email', $request['emailOrPhone'])->first();
+        // } else{
+        //     $user = User::where('phone', $request['emailOrPhone'])->first();
+        // }
 
-        if (is_null($user)) {
-            throw new Exception("هذا الحساب غير موجود.", 404);
-        }
+        // if (is_null($user)) {
+        //     throw new Exception("هذا الحساب غير موجود.", 404);
+        // }
+
+        $user = User::find($userId);
 
         if ($user->is_verified) {
             throw new Exception("الحساب مفعّل مسبقًا، لا حاجة لإعادة إرسال رمز التحقق.", 400);
