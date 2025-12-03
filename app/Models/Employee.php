@@ -23,4 +23,8 @@ class Employee extends Model
     public function notes(){
         return $this->hasMany(Note::class);
     }
+
+    public function lockedComplaints(){
+        return $this->hasMany(Complaint::class, 'locked_by');
+    }
 }

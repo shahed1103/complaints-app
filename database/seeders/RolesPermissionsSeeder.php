@@ -101,7 +101,6 @@ $employee = User::factory()->create([
     'is_verified' => true
 ]);
 
-
 $employee->assignRole($EmployeeRole);
 //assign permissions with the role to the user
 $permissions = $EmployeeRole->permissions()->pluck('name')->toArray();
@@ -111,6 +110,31 @@ $employee->givePermissionTo($permissions);
         'name' => $employee['name'],
         'complaint_department_id' => 1,
         'user_id' => $employee['id']
+       ]);
+
+$employee1 = User::factory()->create([
+    'role_id' => $EmployeeRole->id,
+    'gender_id' => 1,
+    'phone' => '0954411755',
+    'city_id' => 1,
+    'age' => '20',
+    'name' => 'employee',
+    'email' => 'employee1@example.com',
+    'password' => bcrypt('password') ,
+    'photo' => url(Storage::url($targetPath)),
+    'is_verified' => true
+]);
+
+
+$employee1->assignRole($EmployeeRole);
+//assign permissions with the role to the user
+$permissions = $EmployeeRole->permissions()->pluck('name')->toArray();
+$employee1->givePermissionTo($permissions);
+
+      $admin = Employee::query()->create([
+        'name' => $employee1['name'],
+        'complaint_department_id' => 1,
+        'user_id' => $employee1['id']
        ]);
     }
 }

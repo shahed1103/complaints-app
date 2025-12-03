@@ -19,6 +19,9 @@ return new class extends Migration
             $table->foreignId('complaint_status_id')->constrained('complaint_statuses')->onDelete('cascade');
             $table->string('problem_description');
             $table->string('location');
+            $table->unsignedBigInteger('locked_by')->nullable();
+            $table->timestamp('locked_at')->nullable();
+            $table->integer('lock_timeout')->default(30);
             $table->timestamps();
         });
     }

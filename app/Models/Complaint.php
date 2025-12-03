@@ -3,16 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasComplaintLocking;
+
 
 class Complaint extends Model
 {
+    use HasComplaintLocking;
+
     protected $fillable = [
         'complaint_type_id',
         'user_id',
         'complaint_department_id',
         'complaint_status_id',
         'problem_description',
-        'location'
+        'location',
+        'locked_by',
+        'locked_at',
+        'lock_timeout'
+    ];
+
+    protected $casts = [
+    'locked_at' => 'datetime:Y-m-d H:i:s',
     ];
     
     public function complaintType(){
@@ -43,5 +54,8 @@ class Complaint extends Model
         return $this->hasMany(AdditionalInfo::class);
     }
 
+    public function lockedByEmployee(){
+        return $this->belongsTo(Employee::class, 'locked_by');
+    }
 }
 
