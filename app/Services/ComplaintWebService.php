@@ -15,6 +15,7 @@ use Exception;
 use Storage;
 use Illuminate\Support\Facades\File;
 use App\Traits\GetComplaintDepartment;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class ComplaintWebService
 {
@@ -258,7 +259,16 @@ public function totalComplaintByYear(int $year): array
     ];
 }
 
+public function generateAndStorePdf () {
+    $complaints = Complaint::all();
 
+    $pdf = Pdf::view('pdf.complaints' , ['complaints' => $complaints ]);
+    $fileName = 'complaints_' . now()->format('Y_m_d_H_i') . '.pdf';
+
+    Storage::put("public/pdfs/$fileName" , $pdf->content());
+    
+    return "storage/pdfs/$fileName";
+}
 
 
 

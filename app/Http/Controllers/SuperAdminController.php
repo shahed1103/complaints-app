@@ -25,7 +25,7 @@ class SuperAdminController extends Controller
 public function getComplaintDepartment(): JsonResponse {
     $data = [];
     try {
-        $data = $this->superAdminService->getComplaintDepartment();
+        $data = $this->complaintWebService->getComplaintDepartment();
         return Response::Success($data, $data['message']);
     } catch (Throwable $th) {
         $message = $th->getMessage();
@@ -37,7 +37,7 @@ public function getComplaintDepartment(): JsonResponse {
 public function viewComplaintsByDepartmemt($depId): JsonResponse {
     $data = [];
     try {
-        $data = $this->superAdminService->viewComplaintsByDepartmemt($depId);
+        $data = $this->complaintWebService->viewComplaintsByDepartmemt($depId);
         return Response::Success($data, $data['message']);
     } catch (Throwable $th) {
         $message = $th->getMessage();
@@ -49,7 +49,7 @@ public function viewComplaintsByDepartmemt($depId): JsonResponse {
 public function addNewEmployee(AddNewEmployeeRequest $request): JsonResponse {
     $data = [];
     try {
-        $data = $this->superAdminService->addNewEmployee( $request);
+        $data = $this->complaintWebService->addNewEmployee( $request);
         return Response::Success($data, $data['message']);
     } catch (Throwable $th) {
         $message = $th->getMessage();
@@ -61,7 +61,7 @@ public function addNewEmployee(AddNewEmployeeRequest $request): JsonResponse {
 public function getAllEmployees(): JsonResponse {
     $data = [];
     try {
-        $data = $this->superAdminService->getAllEmployees();
+        $data = $this->complaintWebService->getAllEmployees();
         return Response::Success($data, $data['message']);
     } catch (Throwable $th) {
         $message = $th->getMessage();
@@ -73,7 +73,7 @@ public function getAllEmployees(): JsonResponse {
 public function deleteEmployee( $id): JsonResponse {
     $data = [];
     try {
-        $data = $this->superAdminService->deleteEmployee( $id);
+        $data = $this->complaintWebService->deleteEmployee( $id);
         return Response::Success($data, $data['message']);
     } catch (Throwable $th) {
         $message = $th->getMessage();
@@ -85,7 +85,7 @@ public function deleteEmployee( $id): JsonResponse {
 public function getAllUsers(): JsonResponse {
     $data = [];
     try {
-        $data = $this->superAdminService->getAllUsers();
+        $data = $this->complaintWebService->getAllUsers();
         return Response::Success($data, $data['message']);
     } catch (Throwable $th) {
         $message = $th->getMessage();
@@ -97,7 +97,20 @@ public function getAllUsers(): JsonResponse {
 public function deleteUser( $id): JsonResponse {
     $data = [];
     try {
-        $data = $this->superAdminService->deleteUser( $id);
+        $data = $this->complaintWebService->deleteUser( $id);
+        return Response::Success($data, $data['message']);
+    } catch (Throwable $th) {
+        $message = $th->getMessage();
+        $errors[] = $message;
+        return Response::Error($data, $message, $errors);
+    }
+}
+
+
+public function generateAndStorePdf (){
+      $data = [];
+    try {
+        $data = $this->complaintWebService->generateAndStorePdf();
         return Response::Success($data, $data['message']);
     } catch (Throwable $th) {
         $message = $th->getMessage();
