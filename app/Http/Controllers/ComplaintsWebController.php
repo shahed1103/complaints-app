@@ -45,7 +45,8 @@ class ComplaintsWebController extends Controller
         catch(Throwable $th){
             $message = $th->getMessage();
             $errors [] = $message;
-            return Response::Error($data , $message , $errors);
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code );
         }
     }
 
@@ -59,8 +60,8 @@ class ComplaintsWebController extends Controller
         catch(Throwable $th){
             $message = $th->getMessage();
             $errors [] = $message;
-            return Response::Error($data , $message , $errors);
-        }
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code);        }
     }
 
         // add notes about complaint 
@@ -73,8 +74,8 @@ class ComplaintsWebController extends Controller
         catch(Throwable $th){
             $message = $th->getMessage();
             $errors [] = $message;
-            return Response::Error($data , $message , $errors);
-        }
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code);        }
     }
         //additional information 
         public function requestAdditionalInfo(AdditionalInfoRequest $request, $complaintId): JsonResponse{
@@ -86,7 +87,7 @@ class ComplaintsWebController extends Controller
         catch(Throwable $th){
             $message = $th->getMessage();
             $errors [] = $message;
-            return Response::Error($data , $message , $errors);
-        }
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code);        }
     }
 }
