@@ -51,7 +51,6 @@ public function viewComplaintsEmployeeDepartmemt(): array{
         // show complaint details for spicific employee departmemt
 public function viewComplaintDetailsEmployeeDepartmemt($complaintId): array{
     $complaint =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus' , 'complaintAttachments')->find($complaintId);
-
     $attachments = [] ;
 
         foreach ($complaint->complaintAttachments as $complaintAttachment) {
@@ -116,6 +115,7 @@ public function viewComplaintsByDepartmemt($depId): array{
 $complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('complaint_department_id' , $depId)->get();
 
 $complaint_det = [];
+
 
 foreach ($complaints as $complaint) {
     $complaint_det [] = [

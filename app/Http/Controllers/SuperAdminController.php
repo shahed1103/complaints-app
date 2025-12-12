@@ -145,11 +145,17 @@ public function totalComplaintByYear($year): JsonResponse {
     }
 }
 
-
-
-
-
-
+public function viewComplaintDetailsEmployeeDepartmemt($id): JsonResponse {
+    $data = [];
+    try {
+        $data = $this->complaintWebService->totalComplaintByYear($id);
+        return Response::Success($data, $data['message']);
+    } catch (Throwable $th) {
+        $message = $th->getMessage();
+        $errors[] = $message;
+        return Response::Error($data, $message, $errors);
+    }
+}
 
 
 public function generateAndStorePdf (){
