@@ -152,6 +152,10 @@ Route::get('getComplaintDetailsEmployeeDepartmemt/{id}' , 'getComplaintDetailsEm
   Route::get('generateAndStorePdf' , 'generateAndStorePdf')
     ->name('admin.generateAndStorePdf');
 
+  Route::get('openTelescope' , 'openTelescope')
+    ->name('admin.openTelescope');
+
+
 
 });
 

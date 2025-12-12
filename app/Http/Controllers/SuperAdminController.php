@@ -158,6 +158,20 @@ public function getComplaintDetailsEmployeeDepartmemt($id): JsonResponse {
 }
 
 
+public function openTelescope(): JsonResponse {
+    $data = [];
+    try {
+        $data = $this->complaintWebService->openTelescope();
+        return Response::Success($data, $data['message']);
+    } catch (Throwable $th) {
+        $message = $th->getMessage();
+        $errors[] = $message;
+        return Response::Error($data, $message, $errors);
+    }
+}
+
+
+
 public function generateAndStorePdf (){
       $data = [];
     try {

@@ -271,6 +271,14 @@ public function generateAndStorePdf () {
 }
 
 
+public function openTelescope(): array
+{
+
+    return [
+        'url' => 'http://localhost:8000/telescope/requests',
+        'message' => "retrieved successfully"
+    ];
+}
 
 
 
