@@ -146,6 +146,8 @@ Route::middleware('auth:sanctum')->controller(ComplaintsWebController::class)->g
 Route::get('totalComplaintByYear/{year}' , 'totalComplaintByYear')
 ->name('admin.totalComplaintByYear');
 
+Route::get('getComplaintDetailsEmployeeDepartmemt/{id}' , 'getComplaintDetailsEmployeeDepartmemt')
+->name('admin.getComplaintDetailsEmployeeDepartmemt');
 
   Route::get('generateAndStorePdf' , 'generateAndStorePdf')
     ->name('admin.generateAndStorePdf');

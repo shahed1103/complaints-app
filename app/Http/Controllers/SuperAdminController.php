@@ -145,10 +145,10 @@ public function totalComplaintByYear($year): JsonResponse {
     }
 }
 
-public function viewComplaintDetailsEmployeeDepartmemt($id): JsonResponse {
+public function getComplaintDetailsEmployeeDepartmemt($id): JsonResponse {
     $data = [];
     try {
-        $data = $this->complaintWebService->totalComplaintByYear($id);
+        $data = $this->complaintWebService->viewComplaintDetailsEmployeeDepartmemt($id);
         return Response::Success($data, $data['message']);
     } catch (Throwable $th) {
         $message = $th->getMessage();
