@@ -182,7 +182,7 @@ public function getAllUsers():array{
 
     $userRole = Role::where('name', 'Client')->value('id');
     $users = User::whereIn('role_id', [$userRole])
-        ->select('name', 'email', 'phone' , 'age')
+        ->select('id','name', 'email', 'phone' , 'age')
         ->get();
 $message = 'all users are retrived successfully';
 
