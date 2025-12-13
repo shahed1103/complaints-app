@@ -161,7 +161,7 @@ public function getAllEmployees():array{
 
     $employeeRole = Role::where('name', 'Employee')->value('id');
     $employees = User::whereIn('role_id', [$employeeRole])
-        ->select('name', 'email', 'phone' , 'age')
+        ->select('id','name', 'email', 'phone' , 'age')
         ->get();
 $message = 'all employees are retrived successfully';
 
