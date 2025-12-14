@@ -13,7 +13,10 @@ class CopmlaintVersion extends Model
         'complaint_status_id',
         'problem_description',
         'location',
-        'complaint_id'
+        'complaint_id',
+        'editor_name',
+        'editor_id',
+        'editor_role'
     ];
 
 
@@ -45,7 +48,7 @@ class CopmlaintVersion extends Model
     public function additionalInfos() {
         return $this->hasMany(AdditionalInfo::class);
     }
-    
+
     public function complaint(){
         return $this->belongsTo(Complaint::class, 'complaint_id');
     }

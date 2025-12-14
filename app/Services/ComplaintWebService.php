@@ -56,7 +56,7 @@ public function viewComplaintDetailsEmployeeDepartmemt($complaintId): array{
     $employeeId = Employee::where('user_id', Auth::id())->value('id');
 
     $complaint->lock($employeeId);
-    
+
     $attachments = [] ;
 
         foreach ($complaint->complaintAttachments as $complaintAttachment) {
@@ -88,11 +88,30 @@ public function editComplaintStatus($request , $complaintId): array{
             throw new Exception("You cannot edit this complaint. It is locked by another employee.", 409);
         }
 
-        $complaint['complaint_status_id']	= $request['complaint_status_id'];
-        $complaint->save();
+    $user = Auth::user();
+    $userRole = Role::where('id', $user->id)->value('name');
+
+
+   //   $complaint['complaint_status_id']	= $request['complaint_status_id'];
+   //   $complaint->save();
+   // new version
+   $newversion = CopmlaintVersion:: create([
+        'complaint_type_id' => $complaint ->complaint_type_id,
+        'user_id' => $complaint -> user_id,
+        'complaint_department_id' => $complaint->complaint_department_id,
+        'complaint_status_id'=> $request['complaint_status_id'] ,
+        'problem_description' => $complaint ->problem_description,
+        'location' => $complaint -> location,
+        'complaint_id' => $complaint ->id,
+        'editor_id' => $user->id,
+        'editor_named' => $user->name,
+        'editor_role' => $userRole
+   ]);
+
+        $newversion -> save();
         $complaint->unlock();
         ////////////////
-        $user = User::where('id', $complaint->user_id)->first(); 
+        $user = User::where('id', $complaint->user_id)->first();
 
         if ($user && $user->fcm_token) {
                      $fcmController = new FcmController();
@@ -103,9 +122,11 @@ public function editComplaintStatus($request , $complaintId): array{
                      $fcmController->sendFcmNotification($fakeRequest);
         }
         ///////////////
-        $message = 'complaint details for spicific employee departmemt are retrived succesfully';
-        return ['complaint' => $complaint , 'message' => $message];
+        $message = 'statuse changed succesfully';
+        return ['newCmplaintVersion' => $newversion , 'message' => $message];
 }
+
+
 
         // add notes about complaint
 public function addNotesAboutComplaint($request , $complaintId): array{
@@ -131,7 +152,7 @@ $message = 'note for complaint are added succesfully';
     return ['note' => $note , 'message' => $message];
 }
 
- //additional information 
+ //additional information
     public function requestAdditionalInfo($request, $complaintId): array{
         $complaint = Complaint::find($complaintId);
         $user = Auth::user();
@@ -214,6 +235,8 @@ public function getAllEmployees():array{
     $employees = User::whereIn('role_id', [$employeeRole])
         ->select('id','name', 'email', 'phone' , 'age')
         ->get();
+
+
 $message = 'all employees are retrived successfully';
 
 return ['employees' =>  $employees , 'message' => $message];
