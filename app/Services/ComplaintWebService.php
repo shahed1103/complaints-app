@@ -78,10 +78,15 @@ public function viewComplaintDetailsEmployeeDepartmemt($complaintId): array{
         // edit complaint status
 public function editComplaintStatus($request , $complaintId): array{
     $complaint =  Complaint::find($complaintId);
+    $employeeId = Employee::where('user_id', Auth::id())->value('id');
+
+        if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
+            throw new Exception("You cannot edit this complaint. It is locked by another employee.", 409);
+        }
 
         $complaint['complaint_status_id']	= $request['complaint_status_id'];
         $complaint->save();
-
+        $complaint->unlock();
         ////////////////
         $user = User::where('id', $complaint->user_id)->first(); 
 
@@ -102,6 +107,11 @@ public function editComplaintStatus($request , $complaintId): array{
 public function addNotesAboutComplaint($request , $complaintId): array{
 $user = Auth::user();
 $employeeId = Employee::where('user_id' , $user->id)->value('id');
+$complaint = Complaint::find($complaintId);
+
+    if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
+            throw new Exception("This complaint is locked by another employee.", 409);
+    }
 
 $request->validate(['note' => 'required']);
 
@@ -111,10 +121,32 @@ $note = Note::create([
     'employee_id' => $employeeId
 ]);
 
+$complaint->unlock();
+
 $message = 'note for complaint are added succesfully';
     return ['note' => $note , 'message' => $message];
 }
 
+ //additional information 
+    public function requestAdditionalInfo($request, $complaintId): array{
+        $complaint = Complaint::find($complaintId);
+        $user = Auth::user();
+        $employeeId = Employee::where('user_id', $user->id)->value('id');
+
+        if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
+            throw new Exception("This complaint is locked by another employee.", 409);
+        }
+
+        $infoRequest = AdditionalInfo::create([
+            'complaint_id' => $complaintId,
+            'employee_id' => $employeeId,
+            'request_message' => $request['request_message'],
+        ]);
+
+        $complaint->unlock();
+        $message = 'additional information request sent successfully';
+        return [ 'info_request' => $infoRequest, 'message' => $message];
+    }
 
 
 

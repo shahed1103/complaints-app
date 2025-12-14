@@ -53,16 +53,16 @@ class ComplaintsWebController extends Controller
     // edit complaint status 
     public function editComplaintStatus(EditComplaintStatusRequest $request , $complaintId): JsonResponse{
         $data = [] ;
-        // try{
+        try{
             $data = $this->complaintWebService->editComplaintStatus($request , $complaintId);
            return Response::Success($data['complaint'], $data['message']);
-        // }
-        // catch(Throwable $th){
-        //     $message = $th->getMessage();
-        //     $errors [] = $message;
-        //     $code = $th->getCode();
-        //     return Response::ErrorX($data , $message , $errors , $code);
-        // }
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code);
+        }
     }
 
         // add notes about complaint 
