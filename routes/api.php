@@ -115,33 +115,37 @@ Route::middleware('auth:sanctum')->controller(ComplaintsWebController::class)->g
 });
 
 
-    Route::controller(SuperAdminController::class)->group(function () {
-    Route::get('viewComplaintDepartment' , 'viewComplaintDepartment')
-    ->name('admin.viewComplaintDepartment');
 
-    Route::get('viewComplaintsByDepartmemt/{id}' , 'viewComplaintsByDepartmemt')
-    ->name('admin.viewComplaintsByDepartmemt');
 
-  Route::post('addNewEmployee' , 'addNewEmployee')
-    ->name('admin.addNewEmployee');
 
-  Route::get('getAllEmployees' , 'getAllEmployees')
-    ->name('admin.getAllEmployees');
 
-  Route::get('deleteEmployee/{id}' , 'deleteEmployee')
-    ->name('admin.deleteEmployee');
+Route::controller(SuperAdminController::class)->group(function () {
+Route::get('viewComplaintDepartment' , 'viewComplaintDepartment')
+->name('admin.viewComplaintDepartment');
 
-  Route::get('getAllUsers' , 'getAllUsers')
-    ->name('admin.getAllUsers');
+Route::get('viewComplaintsByDepartmemt/{id}' , 'viewComplaintsByDepartmemt')
+->name('admin.viewComplaintsByDepartmemt');
 
-  Route::get('deleteUser/{id}' , 'deleteUser')
-    ->name('admin.deleteUser');
+Route::post('addNewEmployee' , 'addNewEmployee')
+->name('admin.addNewEmployee');
 
- Route::get('lastNewUsers' , 'lastNewUsers')
-    ->name('admin.lastNewUsers');
+Route::get('getAllEmployees' , 'getAllEmployees')
+->name('admin.getAllEmployees');
 
- Route::get('getUserCountsByRoleByYear/{year}' , 'getUserCountsByRoleByYear')
-    ->name('admin.getUserCountsByRoleByYear');
+Route::get('deleteEmployee/{id}' , 'deleteEmployee')
+->name('admin.deleteEmployee');
+
+Route::get('getAllUsers' , 'getAllUsers')
+->name('admin.getAllUsers');
+
+Route::get('deleteUser/{id}' , 'deleteUser')
+->name('admin.deleteUser');
+
+Route::get('lastNewUsers' , 'lastNewUsers')
+->name('admin.lastNewUsers');
+
+Route::get('getUserCountsByRoleByYear/{year}' , 'getUserCountsByRoleByYear')
+->name('admin.getUserCountsByRoleByYear');
 
 Route::get('totalComplaintByYear/{year}' , 'totalComplaintByYear')
 ->name('admin.totalComplaintByYear');
@@ -149,11 +153,11 @@ Route::get('totalComplaintByYear/{year}' , 'totalComplaintByYear')
 Route::get('getComplaintDetailsEmployeeDepartmemt/{id}' , 'getComplaintDetailsEmployeeDepartmemt')
 ->name('admin.getComplaintDetailsEmployeeDepartmemt');
 
-  Route::get('generateAndStorePdf' , 'generateAndStorePdf')
-    ->name('admin.generateAndStorePdf');
+Route::get('generateAndStorePdf' , 'generateAndStorePdf')
+->name('admin.generateAndStorePdf');
 
-  Route::get('openTelescope' , 'openTelescope')
-    ->name('admin.openTelescope');
+Route::get('openTelescope' , 'openTelescope')
+->name('admin.openTelescope');
 
 
 
