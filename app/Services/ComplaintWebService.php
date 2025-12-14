@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\File;
 use App\Traits\GetComplaintDepartment;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Illuminate\Support\Carbon;
+use App\Http\Controllers\FcmController;
+use Illuminate\Http\Request;
 
 class ComplaintWebService
 {
@@ -79,6 +81,19 @@ public function editComplaintStatus($request , $complaintId): array{
 
         $complaint['complaint_status_id']	= $request['complaint_status_id'];
         $complaint->save();
+
+        ////////////////
+        $user = User::where('id', $complaint->user_id)->first(); 
+
+        if ($user && $user->fcm_token) {
+                     $fcmController = new FcmController();
+                     $fakeRequest = new Request([
+                        'user_id' => $user->id,
+                        'title' => "تم التعديل على حالة شكواك",
+                     ]);
+                     $fcmController->sendFcmNotification($fakeRequest);
+        }
+        ///////////////
         $message = 'complaint details for spicific employee departmemt are retrived succesfully';
         return ['complaint' => $complaint , 'message' => $message];
 }

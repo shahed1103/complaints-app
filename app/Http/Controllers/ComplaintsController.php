@@ -63,7 +63,7 @@ class ComplaintsController extends Controller
         }
     }
 
-        //3 view all cities
+        // view all Complaint Department
     public function getComplaintDepartment(): JsonResponse {
         $data = [] ;
         try{
@@ -77,7 +77,7 @@ class ComplaintsController extends Controller
         }
     }
 
-    //4 view all genders
+    // view all Complaint Type
     public function getComplaintType(): JsonResponse {
         $data = [] ;
         try{
