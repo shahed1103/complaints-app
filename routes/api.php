@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintsController;
 use App\Http\Controllers\ComplaintsWebController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\FcmController;
 
 
 /*
@@ -53,17 +54,14 @@ Route::middleware('auth:sanctum')->get('logout', [AuthController::class, 'logout
 
 
 
-// Route::controller(ComplaintsController::class)->group(function () {
+Route::controller(ComplaintsController::class)->group(function () {
 
-//     Route::get('getComplaintDepartment' , 'getComplaintDepartment')
-//     ->name('getComplaintDepartment');
+    Route::get('getComplaintDepartment' , 'getComplaintDepartment')
+    ->name('getComplaintDepartment');
 
-//     Route::get('getComplaintType' , 'getComplaintType')
-//     ->name('all.getComplaintType')
-//
-//
-// ;
-// });
+    Route::get('getComplaintType' , 'getComplaintType')
+    ->name('all.getComplaintType');
+});
 
 
 
@@ -81,13 +79,6 @@ Route::middleware('auth:sanctum')->controller(ComplaintsController::class)->grou
     ->middleware('can:viewComplaintDetails');
 
 });
-
-
-
-
-
-
-
 
 
 
@@ -155,7 +146,9 @@ Route::get('getComplaintDetailsEmployeeDepartmemt/{id}' , 'getComplaintDetailsEm
   Route::get('openTelescope' , 'openTelescope')
     ->name('admin.openTelescope');
 
-
-
 });
 
+Route::put('/update-device-token', [FcmController::class, 'updateDeviceToken']);
+Route::post('/send-notification', [FcmController::class, 'sendFcmNotification']);
+Route::get('/get-notifications/{userId}', [FcmController::class, 'getUserNotifications']);
+Route::get('/get-unread-notifications-count/{userId}', [FcmController::class, 'getUnreadCount']);

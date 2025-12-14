@@ -17,6 +17,8 @@ use Exception;
 use Storage;
 use App\Traits\GetComplaintDepartment;
 use Illuminate\Support\Facades\File;
+use App\Http\Controllers\FcmController;
+use Illuminate\Http\Request;
 
 
 class ComplaintService
@@ -54,6 +56,17 @@ class ComplaintService
                 }
 
             }
+
+            ///////////
+               if ($user && $user->fcm_token) {
+                     $fcmController = new FcmController();
+                     $fakeRequest = new Request([
+                        'user_id' => $user->id,
+                        'title' => "تم استلام شكواك وسيتم مراجعتها",
+                     ]);
+                     $fcmController->sendFcmNotification($fakeRequest);
+               }
+            //////////
 
             $all = ['complaint' => $newComplaint , 'attachments' => $files];
 
