@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-                Schema::create('complaint_versions', function (Blueprint $table) {
+            Schema::create('complaint_versions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('editor_id')->constrained('users')->onDelete('cascade');
-
             $table->foreignId('complaint_type_id')->constrained('complaint_types')->onDelete('cascade');
             $table->foreignId('complaint_department_id')->constrained('complaint_departments')->onDelete('cascade');
             $table->foreignId('complaint_status_id')->constrained('complaint_statuses')->onDelete('cascade');
@@ -24,6 +23,8 @@ return new class extends Migration
             $table->string('location');
             $table->string('editor_name');
             $table->string('editor_role');
+            $table->string('what_edit');
+            $table->string('note')->nullable();
             $table->timestamps();
         });
     }

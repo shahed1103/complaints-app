@@ -169,6 +169,18 @@ public function openTelescope(): JsonResponse {
         return Response::Error($data, $message, $errors);
     }
 }
+public function getAllComplaintVersion ($complaint_id){
+      $data = [];
+    try {
+        $data = $this->complaintWebService->getAllComplaintVersion($complaint_id);
+        return Response::Success($data, $data['message']);
+    } catch (Throwable $th) {
+        $message = $th->getMessage();
+        $errors[] = $message;
+        return Response::Error($data, $message, $errors);
+    }
+}
+
 
 
 
@@ -183,4 +195,8 @@ public function generateAndStorePdf (){
         return Response::Error($data, $message, $errors);
     }
 }
+
+
+
 }
+

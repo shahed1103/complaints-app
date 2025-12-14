@@ -29,7 +29,7 @@ class RolesPermissionsSeeder extends Seeder
                         'logout' , 'addComplaint' , 'viewMyComplaints' , 'viewComplaintDetails' ,
                         'viewComplaintsEmployeeDepartmemt' , 'viewComplaintDetailsEmployeeDepartmemt' , 'editComplaintStatus' ,
                         'addNotesAboutComplaint' , 'requestAdditionalInfo , getComplaintDepartment'
-              ,'requestAdditionalInfo'    , 'viewComplaintsByDepartmemt' ];
+                        ,'requestAdditionalInfo'    , 'viewComplaintsByDepartmemt' ];
 
         foreach ($permissions as $permissionName) {
             Permission::findOrCreate($permissionName, 'web');

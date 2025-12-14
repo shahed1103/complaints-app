@@ -57,8 +57,10 @@ class Complaint extends Model
     public function lockedByEmployee(){
         return $this->belongsTo(Employee::class, 'locked_by');
     }
-        public function complaintِVersions(){
-        return $this->hasMany(CopmlaintVersion::class);
+
+
+        public function complaintVersions(){
+        return $this->hasMany(ComplaintVersion::class);
     }
 
 }

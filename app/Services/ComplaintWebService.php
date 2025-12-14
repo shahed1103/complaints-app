@@ -7,13 +7,16 @@ use App\Models\User;
 use App\Models\Complaint;
 use App\Models\AdditionalInfo;
 use App\Models\Employee;
+use App\Models\ComplaintVersion;
+use App\Models\ComplaintType;
+use App\Models\ComplaintStatus;
+use App\Models\ComplaintDepartment;
 use App\Models\Note;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 use Exception;
 use Storage;
-use App\Models\ComplaintDepartment;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\File;
 use App\Traits\GetComplaintDepartment;
@@ -81,21 +84,21 @@ public function viewComplaintDetailsEmployeeDepartmemt($complaintId): array{
 
         // edit complaint status
 public function editComplaintStatus($request , $complaintId): array{
+
     $complaint =  Complaint::find($complaintId);
     $employeeId = Employee::where('user_id', Auth::id())->value('id');
 
         if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
             throw new Exception("You cannot edit this complaint. It is locked by another employee.", 409);
         }
-
     $user = Auth::user();
     $userRole = Role::where('id', $user->id)->value('name');
-
-
    //   $complaint['complaint_status_id']	= $request['complaint_status_id'];
    //   $complaint->save();
+
+
    // new version
-   $newversion = CopmlaintVersion:: create([
+   $newversion = ComplaintVersion:: create([
         'complaint_type_id' => $complaint ->complaint_type_id,
         'user_id' => $complaint -> user_id,
         'complaint_department_id' => $complaint->complaint_department_id,
@@ -104,8 +107,10 @@ public function editComplaintStatus($request , $complaintId): array{
         'location' => $complaint -> location,
         'complaint_id' => $complaint ->id,
         'editor_id' => $user->id,
-        'editor_named' => $user->name,
-        'editor_role' => $userRole
+        'editor_name' => $user->name,
+        'editor_role' => $userRole,
+        'note' =>'s',
+        'what_edit' => 'تعديل  على الحالة'
    ]);
 
         $newversion -> save();
@@ -123,7 +128,7 @@ public function editComplaintStatus($request , $complaintId): array{
         }
         ///////////////
         $message = 'statuse changed succesfully';
-        return ['newCmplaintVersion' => $newversion , 'message' => $message];
+        return ['newComplaintVersion' => $newversion , 'message' => $message];
 }
 
 
@@ -131,7 +136,9 @@ public function editComplaintStatus($request , $complaintId): array{
         // add notes about complaint
 public function addNotesAboutComplaint($request , $complaintId): array{
 $user = Auth::user();
+$userRole = Role::where('id', $user->id)->value('name');
 $employeeId = Employee::where('user_id' , $user->id)->value('id');
+
 $complaint = Complaint::find($complaintId);
 
     if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
@@ -140,16 +147,32 @@ $complaint = Complaint::find($complaintId);
 
 $request->validate(['note' => 'required']);
 
-$note = Note::create([
-    'note' => $request['note'],
-    'complaint_id' => $complaintId,
-    'employee_id' => $employeeId
-]);
+ $newversion = ComplaintVersion:: create([
+        'complaint_type_id' => $complaint ->complaint_type_id,
+        'user_id' => $complaint -> user_id,
+        'complaint_department_id' => $complaint->complaint_department_id,
+        'complaint_status_id'=> $complaint->complaint_status_id ,
+        'problem_description' => $complaint ->problem_description,
+        'location' => $complaint -> location,
+        'complaint_id' => $complaint ->id,
+        'editor_id' => $user->id,
+        'editor_name' => $user->name,
+        'editor_role' => $userRole,
+        'note' => $request['note'],
+        'what_edit' => 'إضافة ملاحظة '
+   ]);
 
+    $newversion -> save();
+
+
+// $note = Note::create([
+//     'note' => $request['note'],
+//     'complaint_id' => $complaintId,
+//     'employee_id' => $employeeId
+// ]);
 $complaint->unlock();
-
 $message = 'note for complaint are added succesfully';
-    return ['note' => $note , 'message' => $message];
+    return ['newversion' => $newversion , 'message' => $message];
 }
 
  //additional information
@@ -355,6 +378,35 @@ public function openTelescope(): array
 }
 
 
+public function getAllComplaintVersion($complaint_id):array{
+
+
+$versions= ComplaintVersion::where('complaint_id' ,$complaint_id )->get();
+
+
+   foreach ($versions as $version) {
+$complaintType= ComplaintType::where('id',$version->complaint_type_id)->value('type');
+$complaintDepartment= ComplaintDepartment::where('id',$version->complaint_department_id)->value('department_name');
+$complaintStatus= ComplaintStatus::where('id',$version->complaint_status_id)->value('status');
+
+        $version_det [] = [
+            'id' => $version['id'],
+            'complaint_id' =>$version['complaint_id'],
+            'complaint_type' => $complaintType,
+            'complaint_department' => $complaintDepartment,
+            'complaint_status' => $complaintStatus,
+            'location' => $version['location'],
+            'problem_description' => $version['problem_description'],
+            'editor_name' => $version ['editor_name'],
+            'editor_role' => $version ['editor_role'],
+            'what_edit' => $version ['what_edit'] ,
+            'note' => $version ['note']
+        ];
+    }
+$message = 'all versions are retrived successfully';
+
+return ['versions' =>  $version_det , 'message' => $message];
+}
 
 
 }

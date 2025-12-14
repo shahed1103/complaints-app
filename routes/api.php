@@ -150,6 +150,10 @@ Route::get('generateAndStorePdf' , 'generateAndStorePdf')
 Route::get('openTelescope' , 'openTelescope')
 ->name('admin.openTelescope');
 
+Route::get('getAllComplaintVersion/{id}' , 'getAllComplaintVersion')
+->name('admin.getAllComplaintVersion');
+
+
 });
 
 Route::put('/update-device-token', [FcmController::class, 'updateDeviceToken']);
