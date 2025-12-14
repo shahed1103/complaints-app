@@ -26,7 +26,7 @@ class UserSignupRequest extends FormRequest
     public function rules()
     {
         return [
-            'emailOrPhone' => 'required',
+            'emailOrPhone' => 'required|unique:users,email,phone',
             // 'email' => 'nullable|email|unique:users,email',
             'name' => 'required|string|min:3',
             'password' => 'required|confirmed|min:8',
