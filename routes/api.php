@@ -7,6 +7,7 @@ use App\Http\Controllers\ComplaintsController;
 use App\Http\Controllers\ComplaintsWebController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\FcmController;
+use App\Http\Controllers\PdfController;
 
 
 /*
@@ -153,8 +154,14 @@ Route::get('openTelescope' , 'openTelescope')
 Route::get('getAllComplaintVersion/{id}' , 'getAllComplaintVersion')
 ->name('admin.getAllComplaintVersion');
 
-
 });
+
+Route::controller(PdfController::class)->group(function () {
+Route::get('generateComplaintsPdf' , 'generateComplaintsPdf')
+->name('admin.generateComplaintsPdf');
+});
+
+
 
 Route::put('/update-device-token', [FcmController::class, 'updateDeviceToken']);
 Route::post('/send-notification', [FcmController::class, 'sendFcmNotification']);

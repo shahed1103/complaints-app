@@ -401,7 +401,7 @@ $complaintStatus= ComplaintStatus::where('id',$version->complaint_status_id)->va
             'editor_role' => $version ['editor_role'],
             'what_edit' => $version ['what_edit'] ,
             'note' => $version ['note']
-        ];
+        ];                                          
     }
 $message = 'all versions are retrived successfully';
 
