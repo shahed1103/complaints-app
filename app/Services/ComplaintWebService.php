@@ -337,20 +337,43 @@ public function getUserCountsByRoleByYear(int $year): array
     ];
 }
 
-
 public function totalComplaintByYear(int $year): array
 {
-    $startOfYear = Carbon::createFromDate($year, 1, 1)->startOfDay();
-    $endOfYear = Carbon::createFromDate($year, 12, 31)->endOfDay();
+    $complaints = Complaint::whereYear('created_at', $year)
+        ->selectRaw('MONTH(created_at) as month, COUNT(id) as total')
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get();
 
-    $complaints = Complaint::whereBetween('created_at', [$startOfYear, $endOfYear])
-                    ->count();
+    $monthlyTotals = [];
+    for ($i = 1; $i <= 12; $i++) {
+        $monthlyTotals[$i] = 0;
+    }
+
+    foreach ($complaints as $row) {
+        $monthlyTotals[(int)$row->month] = (float)$row->total;
+    }
+
+    $message = "Monthly complaints totals for year {$year} retrieved successfully";
 
     return [
-        'complaints' => $complaints,
-        'message' => "Total complaints for year {$year} retrieved successfully"
+        'data' => $monthlyTotals,
+        'message' => $message
     ];
 }
+// public function totalComplaintByYear(int $year): array
+// {
+//     $startOfYear = Carbon::createFromDate($year, 1, 1)->startOfDay();
+//     $endOfYear = Carbon::createFromDate($year, 12, 31)->endOfDay();
+
+//     $complaints = Complaint::whereBetween('created_at', [$startOfYear, $endOfYear])
+//                     ->count();
+
+//     return [
+//         'complaints' => $complaints,
+//         'message' => "Total complaints for year {$year} retrieved successfully"
+//     ];
+// }
 
 
 
