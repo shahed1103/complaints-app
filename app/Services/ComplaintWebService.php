@@ -109,7 +109,6 @@ public function editComplaintStatus($request , $complaintId): array{
         'editor_id' => $user->id,
         'editor_name' => $user->name,
         'editor_role' => $userRole,
-        'note' =>'s',
         'what_edit' => 'تعديل  على الحالة'
    ]);
 
@@ -401,7 +400,7 @@ $complaintStatus= ComplaintStatus::where('id',$version->complaint_status_id)->va
             'editor_role' => $version ['editor_role'],
             'what_edit' => $version ['what_edit'] ,
             'note' => $version ['note']
-        ];                                          
+        ];
     }
 $message = 'all versions are retrived successfully';
 
