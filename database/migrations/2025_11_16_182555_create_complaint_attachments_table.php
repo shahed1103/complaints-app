@@ -15,6 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('attachment');
             $table->foreignId('complaint_id')->constrained('complaints')->onDelete('cascade');
+
+            $table->foreignId('complaint_version_id')
+                    ->nullable()
+                    ->constrained('complaint_versions')
+                    ->nullOnDelete();
             $table->timestamps();
         });
     }

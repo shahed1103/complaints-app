@@ -7,9 +7,11 @@ use App\Models\User;
 use App\Models\Complaint;
 use App\Models\ComplaintAttachment;
 use App\Models\ComplaintDepartment;
-
+use App\Models\ComplaintVersion;
 use App\Models\ComplaintType;
-
+use App\Models\AdditionalInfo;
+use App\Models\Employee;
+use Spatie\Permission\Models\Role;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -137,4 +139,72 @@ public function getComplaintDepartment():array{
 
         return ['gender' =>  $types , 'message' => $message];
      }
+
+
+    //response additional information
+    public function responsedToAdditionalInfo($request , $complaintId): array{
+        $user = Auth::user();
+        $userRole = Role::where('id', $user->id)->value('name');
+
+        $complaint = Complaint::where('id', $complaintId)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $additionalInfo = AdditionalInfo::where('complaint_id', $complaintId)
+            ->where('status', 'PENDING')
+            ->latest()
+            ->first();
+
+        if (!$additionalInfo) {
+            throw new Exception('لا يوجد طلب معلومات مفتوح لهذه الشكوى', 404);
+        }
+
+        // Version log
+        $complaint_version =  ComplaintVersion::create([
+            'complaint_id' => $complaint->id,
+            'complaint_type_id' => $complaint->complaint_type_id,
+            'complaint_department_id' => $complaint->complaint_department_id,
+            'complaint_status_id' => $complaint->complaint_status_id,
+            'user_id' => $complaint->user_id,
+            'problem_description' => $request->problem_description ?? $complaint->problem_description,
+            'location' => $complaint->location,
+            'editor_id' => $user->id,
+            'editor_name' => $user->name,
+            'editor_role' => $userRole,
+            'what_edit' => 'رد على طلب معلومات إضافية',
+        ]);
+
+        if ($request->hasFile('attachments')) {
+            echo "Ddd";
+            foreach ($request->file('attachments') as $file) {
+                                echo "vvd";
+
+                    $path = $file->store('uploads/complaints', 'public');
+
+            $ss = ComplaintAttachment::create([
+                    'attachment' =>  $path,
+                    'complaint_id' => $complaint->id,
+                    'complaint_version_id' => $complaint_version->id
+                ]);
+            }
+        }
+
+        $additionalInfo->update([
+            'answered_at' => now(),
+            'status' => 'ANSWERED'
+        ]);
+
+        // Notification
+            $employee = Employee::with('user')->find($additionalInfo->employee_id);
+            if ($employee->user && $employee->user->fcm_token) {
+                (new FcmController())->sendFcmNotification(new Request([
+                    'user_id' => $employee->user->id,
+                    'title' => 'تم إضافة المعلومات المطلوبة'
+                ]));
+            }
+
+        $message = 'Additional information responsed successfully';
+        return ['info_response' => $ss,'message' => $message];
+    }
+
 }

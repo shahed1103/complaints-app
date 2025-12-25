@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Responses\response;
 use App\Services\ComplaintService;
 use App\Http\Requests\Complaint\AddComplaintRequest;
-
+use App\Http\Requests\Complaint\AdditionalInfoResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -89,6 +89,21 @@ class ComplaintsController extends Controller
             $errors [] = $message;
             return Response::Error($data , $message , $errors);
         }
+    }
+
+    //response additional information
+        public function responsedToAdditionalInfo(AdditionalInfoResponse $request, $complaintId): JsonResponse{
+        $data = [] ;
+        // try{
+            $data = $this->complaintService->responsedToAdditionalInfo($request , $complaintId);
+           return Response::Success($data['info_response'], $data['message']);
+        // }
+        // catch(Throwable $th){
+        //     $message = $th->getMessage();
+        //     $errors [] = $message;
+        //     $code = $th->getCode() ?? 400;
+        //     return Response::ErrorX($data , $message , $errors , $code);
+        // }
     }
 
 }
