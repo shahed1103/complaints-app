@@ -399,34 +399,6 @@ public function totalComplaintByYear(int $year): array
         'message' => $message
     ];
 }
-// public function totalComplaintByYear(int $year): array
-// {
-//     $startOfYear = Carbon::createFromDate($year, 1, 1)->startOfDay();
-//     $endOfYear = Carbon::createFromDate($year, 12, 31)->endOfDay();
-
-//     $complaints = Complaint::whereBetween('created_at', [$startOfYear, $endOfYear])
-//                     ->count();
-
-//     return [
-//         'complaints' => $complaints,
-//         'message' => "Total complaints for year {$year} retrieved successfully"
-//     ];
-// }
-
-
-
-public function generateAndStorePdf () {
-
-    $complaints = Complaint::all();
-
-    $pdf = Pdf::view('pdf.complaints' , ['complaints' => $complaints ]);
-    $fileName = 'complaints_' . now()->format('Y_m_d_H_i') . '.pdf';
-
-    Storage::put("public/pdfs/$fileName" , $pdf->content());
-    return "storage/pdfs/$fileName";
-
-}
-
 
 public function openTelescope(): array
 {
@@ -437,19 +409,15 @@ public function openTelescope(): array
     ];
 }
 
-
 public function getAllComplaintVersion($complaint_id):array{
-
-
 $versions= ComplaintVersion::where('complaint_id' ,$complaint_id )->get();
-
-
-   foreach ($versions as $version) {
+ $version_det =[];
+foreach ($versions as $version) {
 $complaintType= ComplaintType::where('id',$version->complaint_type_id)->value('type');
 $complaintDepartment= ComplaintDepartment::where('id',$version->complaint_department_id)->value('department_name');
 $complaintStatus= ComplaintStatus::where('id',$version->complaint_status_id)->value('status');
 
-        $version_det [] = [
+        $version_det  = [
             'id' => $version['id'],
             'complaint_id' =>$version['complaint_id'],
             'complaint_type' => $complaintType,
@@ -463,8 +431,8 @@ $complaintStatus= ComplaintStatus::where('id',$version->complaint_status_id)->va
             'note' => $version ['note']
         ];
     }
-$message = 'all versions are retrived successfully';
 
+$message = 'all versions are retrived successfully';
 return ['versions' =>  $version_det , 'message' => $message];
 }
 
