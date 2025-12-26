@@ -100,13 +100,6 @@ class ComplaintService
             $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
 
             $attachments = [] ;
-                // foreach ($complaintVersion->complaintAttachments ?? $complaint->complaintAttachments as $complaintAttachment) {
-                //     $attachments [] = [
-                //         'id' => $complaintAttachment->id ,
-                //         'attachment' => url(Storage::url($complaintAttachment->attachment))
-                //     ];
-                // }
-
                 $attachmentsQuery = ComplaintAttachment::where('complaint_id', $complaintId);
 
                 if ($complaintVersion) {

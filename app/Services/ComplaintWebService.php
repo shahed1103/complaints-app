@@ -51,7 +51,7 @@ public function viewComplaintsEmployeeDepartmemt(): array{
 
             $message = 'complaints for spicific employee departmemt are retrived succesfully';
             return ['complaints' => $complaint_det , 'message' => $message];
-    }
+}
 
         // show complaint details for spicific employee departmemt
 public function viewComplaintDetailsEmployeeDepartmemt($complaintId): array{
