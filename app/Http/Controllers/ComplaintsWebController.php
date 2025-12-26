@@ -53,32 +53,33 @@ class ComplaintsWebController extends Controller
     // edit complaint status
     public function editComplaintStatus(EditComplaintStatusRequest $request , $complaintId): JsonResponse{
         $data = [] ;
-        // try{
+        try{
             $data = $this->complaintWebService->editComplaintStatus($request , $complaintId);
            return Response::Success($data['newComplaintVersion'], $data['message']);
-        // // }
-        // catch(Throwable $th){
-        //     $message = $th->getMessage();
-        //     $errors [] = $message;
-        //     $code = $th->getCode();
-        //     return Response::ErrorX($data , $message , $errors , $code);
-        // }
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code);
+        }
     }
 
         // add notes about complaint
         public function addNotesAboutComplaint(Request $request , $complaintId): JsonResponse{
         $data = [] ;
-        // try{
+        try{
             $data = $this->complaintWebService->addNotesAboutComplaint($request , $complaintId);
            return Response::Success($data['newversion'], $data['message']);
-        // }
-    //     catch(Throwable $th){
-    //         $message = $th->getMessage();
-    //         $errors [] = $message;
-    //         $code = $th->getCode();
-    //         return Response::ErrorX($data , $message , $errors , $code);        }
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            $code = $th->getCode();
+            return Response::ErrorX($data , $message , $errors , $code);
+        }
     }
-        //additional information
+     //request additional information
         public function requestAdditionalInfo(AdditionalInfoRequest $request, $complaintId): JsonResponse{
         $data = [] ;
         try{
@@ -89,8 +90,10 @@ class ComplaintsWebController extends Controller
             $message = $th->getMessage();
             $errors [] = $message;
             $code = $th->getCode();
-            return Response::ErrorX($data , $message , $errors , $code);        }
+            return Response::ErrorX($data , $message , $errors , $code);
+        }
     }
-    /////
+
+        /////
     ///edit
 }

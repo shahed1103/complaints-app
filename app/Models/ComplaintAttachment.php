@@ -8,7 +8,8 @@ class ComplaintAttachment extends Model
 {
         protected $fillable = [
         'attachment',
-        'complaint_id'
+        'complaint_id',
+        'complaint_version_id'
     ];
 
     public function complaint(){

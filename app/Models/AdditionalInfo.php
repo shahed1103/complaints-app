@@ -10,6 +10,9 @@ class AdditionalInfo extends Model
         'complaint_id',
         'employee_id',
         'request_message',
+        'requested_at',
+        'answered_at',
+        'status'
     ];
 
     public function complaint() {

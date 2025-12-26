@@ -174,30 +174,63 @@ $message = 'note for complaint are added succesfully';
     return ['newversion' => $newversion , 'message' => $message];
 }
 
- //additional information
+     //request additional information
     public function requestAdditionalInfo($request, $complaintId): array{
-        $complaint = Complaint::find($complaintId);
+
+        $complaint = Complaint::findOrFail($complaintId);
         $user = Auth::user();
+        $userRole = Role::where('id', $user->id)->value('name');
+
         $employeeId = Employee::where('user_id', $user->id)->value('id');
 
         if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
             throw new Exception("This complaint is locked by another employee.", 409);
         }
 
+        $openRequest = AdditionalInfo::where('complaint_id', $complaintId)
+            ->where('status', 'PENDING')
+            ->first();
+
+        if ($openRequest) {
+            throw new Exception("There is already a pending additional info request.", 422);
+        }
+
         $infoRequest = AdditionalInfo::create([
             'complaint_id' => $complaintId,
             'employee_id' => $employeeId,
             'request_message' => $request['request_message'],
+            'status' => 'PENDING',
+            'requested_at' => now()
+        ]);
+
+        // Version log
+        $complaint_version = ComplaintVersion::create([
+            'complaint_type_id' => $complaint->complaint_type_id,
+            'user_id' => $complaint->user_id,
+            'complaint_department_id' => $complaint->complaint_department_id,
+            'complaint_status_id'=> $complaint->complaint_status_id,
+            'problem_description' => $complaint->problem_description,
+            'location' => $complaint->location,
+            'complaint_id' => $complaint->id,
+            'editor_id' => $user->id,
+            'editor_name' => $user->name,
+            'editor_role' => $userRole,
+            'what_edit' => 'طلب معلومات إضافية'
         ]);
 
         $complaint->unlock();
-        $message = 'additional information request sent successfully';
-        return [ 'info_request' => $infoRequest, 'message' => $message];
+
+        // Notification
+        $complaintUser = User::find($complaint->user_id);
+        if ($complaintUser && $complaintUser->fcm_token) {
+            (new FcmController())->sendFcmNotification(new Request([
+                'user_id' => $complaintUser->id,
+                'title' => 'تم طلب معلومات إضافية بخصوص شكواك'
+            ]));
+        }
+        $message = 'Additional information requested successfully';
+        return ['info_request' => $infoRequest,'message' => $message];
     }
-
-
-
-
 
 //////////////////////////////////////////////////////Admin
 

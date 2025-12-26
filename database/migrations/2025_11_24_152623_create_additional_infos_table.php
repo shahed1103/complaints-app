@@ -16,6 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('complaint_id');
             $table->unsignedBigInteger('employee_id');
             $table->text('request_message');
+            $table->timestamp('requested_at')->nullable();
+            $table->timestamp('answered_at')->nullable();
+            $table->enum('status', ['PENDING', 'ANSWERED'])->default('PENDING');
             $table->timestamps();
 
             $table->foreign('complaint_id')->references('id')->on('complaints')->onDelete('cascade');
@@ -23,7 +26,6 @@ return new class extends Migration
         });
 
     }
-
     /**
      * Reverse the migrations.
      */

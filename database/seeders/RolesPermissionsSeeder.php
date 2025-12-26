@@ -28,8 +28,8 @@ class RolesPermissionsSeeder extends Seeder
                         'userForgotPassword' , 'userCheckCode' , 'userResetPassword',
                         'logout' , 'addComplaint' , 'viewMyComplaints' , 'viewComplaintDetails' ,
                         'viewComplaintsEmployeeDepartmemt' , 'viewComplaintDetailsEmployeeDepartmemt' , 'editComplaintStatus' ,
-                        'addNotesAboutComplaint' , 'requestAdditionalInfo , getComplaintDepartment'
-                        ,'requestAdditionalInfo'    , 'viewComplaintsByDepartmemt' ];
+                        'addNotesAboutComplaint'  , 'getComplaintDepartment'
+                        ,'requestAdditionalInfo'    , 'viewComplaintsByDepartmemt' , 'responsedToAdditionalInfo'];
 
         foreach ($permissions as $permissionName) {
             Permission::findOrCreate($permissionName, 'web');
@@ -39,7 +39,7 @@ class RolesPermissionsSeeder extends Seeder
         // 3. Assign permissions
 
         $AdminRole->syncPermissions([$permissions]);
-        $ClientRole->syncPermissions(['addComplaint' , 'viewMyComplaints' , 'viewComplaintDetails']);
+        $ClientRole->syncPermissions(['addComplaint' , 'viewMyComplaints' , 'viewComplaintDetails' , 'responsedToAdditionalInfo']);
         $EmployeeRole->syncPermissions(['viewComplaintsEmployeeDepartmemt' , 'viewComplaintDetailsEmployeeDepartmemt' ,
                                         'editComplaintStatus' , 'addNotesAboutComplaint' , 'requestAdditionalInfo']);
 

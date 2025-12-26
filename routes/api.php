@@ -79,6 +79,11 @@ Route::middleware('auth:sanctum')->controller(ComplaintsController::class)->grou
     ->name('user.view.Complaint.details')
     ->middleware('can:viewComplaintDetails');
 
+    Route::post('responsedToAdditionalInfo/{complaintId}' , 'responsedToAdditionalInfo')
+    ->name('user.responsed.To.Additional.Info')
+    ->middleware('can:responsedToAdditionalInfo');
+    
+
 });
 
 
