@@ -132,8 +132,6 @@ public function editComplaintStatus($request , $complaintId): array{
         return ['newComplaintVersion' => $newversion , 'message' => $message];
 }
 
-
-
         // add notes about complaint
 public function addNotesAboutComplaint($request , $complaintId): array{
     $user = Auth::user();
@@ -244,48 +242,48 @@ public function viewComplaintDepartment():array{
 }
 
 public function viewComplaintsByDepartmemt($depId): array{
-$complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('complaint_department_id' , $depId)->get();
+    $complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('complaint_department_id' , $depId)->get();
 
-$complaint_det = [];
+    $complaint_det = [];
 
 
-foreach ($complaints as $complaint) {
-    $complaint_det [] = [
-        'id' => $complaint['id'],
-        'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
-        'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
-        'location' => $complaint['location'],
-        'complaint_status' => ['id' => $complaint->complaintStatus['id'] , 'status' => $complaint->complaintStatus['status']],
-    ];
-}
+    foreach ($complaints as $complaint) {
+        $complaint_det [] = [
+            'id' => $complaint['id'],
+            'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
+            'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
+            'location' => $complaint['location'],
+            'complaint_status' => ['id' => $complaint->complaintStatus['id'] , 'status' => $complaint->complaintStatus['status']],
+        ];
+    }
 
         $message = 'complaints for spicific departmemt are retrived succesfully';
         return ['complaints' => $complaint_det , 'message' => $message];
 }
 
 public function addNewEmployee($request): array{
-$employee = User::factory()->create([
-    'role_id' => 3,
-    'gender_id' => $request['gender_id'],
-    'phone' => $request['phone'],
-    'city_id' => $request['city_id'],
-    'age' => $request['age'],
-    'name' => $request['name'],
-    'email' => $request['email'],
-    'password' => bcrypt($request['password']) ,
-    'photo' => url(Storage::url($request['photo'])),
-    'is_verified' => true
-]);
-$employee->save();
+    $employee = User::factory()->create([
+        'role_id' => 3,
+        'gender_id' => $request['gender_id'],
+        'phone' => $request['phone'],
+        'city_id' => $request['city_id'],
+        'age' => $request['age'],
+        'name' => $request['name'],
+        'email' => $request['email'],
+        'password' => bcrypt($request['password']) ,
+        'photo' => url(Storage::url($request['photo'])),
+        'is_verified' => true
+    ]);
+    $employee->save();
 
-$employeeDep = Employee::create([
- 'user_id' => $employee->id,
- 'complaint_department_id' => $request['complaint_department_id'],
- 'name' => $request['name']
-]);
+    $employeeDep = Employee::create([
+    'user_id' => $employee->id,
+    'complaint_department_id' => $request['complaint_department_id'],
+    'name' => $request['name']
+    ]);
 
-$message = 'Employee added succesfully';
-return ['employee' => $employee , 'message' => $message];
+    $message = 'Employee added succesfully';
+    return ['employee' => $employee , 'message' => $message];
 }
 
 
@@ -297,14 +295,12 @@ public function getAllEmployees():array{
         ->get();
 
 
-$message = 'all employees are retrived successfully';
+    $message = 'all employees are retrived successfully';
 
-return ['employees' =>  $employees , 'message' => $message];
+    return ['employees' =>  $employees , 'message' => $message];
 }
 
-
-public function deleteEmployee($id): array
-{
+public function deleteEmployee($id): array{
     $user = User::find($id);
     $user->delete();
     return [
@@ -318,13 +314,12 @@ public function getAllUsers():array{
     $users = User::whereIn('role_id', [$userRole])
         ->select('id','name', 'email', 'phone' , 'age')
         ->get();
-$message = 'all users are retrived successfully';
+    $message = 'all users are retrived successfully';
 
-return ['users' =>  $users , 'message' => $message];
+    return ['users' =>  $users , 'message' => $message];
 }
 
-public function deleteUser($id): array
-{
+public function deleteUser($id): array{
     $user = User::find($id);
     $user->delete();
     return [
@@ -332,10 +327,7 @@ public function deleteUser($id): array
     ];
 }
 
-
-
-public function lastNewUsers(): array
-{
+public function lastNewUsers(): array{
     $users = User::where('created_at', '>=', Carbon::now()->subDays(30))->get();
 
     return [
@@ -344,9 +336,7 @@ public function lastNewUsers(): array
     ];
 }
 
-
-public function getUserCountsByRoleByYear(int $year): array
-{
+public function getUserCountsByRoleByYear(int $year): array{
     $startOfYear = Carbon::createFromDate($year, 1, 1)->startOfDay();
     $endOfYear = Carbon::createFromDate($year, 12, 31)->endOfDay();
 
@@ -375,8 +365,7 @@ public function getUserCountsByRoleByYear(int $year): array
     ];
 }
 
-public function totalComplaintByYear(int $year): array
-{
+public function totalComplaintByYear(int $year): array{
     $complaints = Complaint::whereYear('created_at', $year)
         ->selectRaw('MONTH(created_at) as month, COUNT(id) as total')
         ->groupBy('month')
@@ -413,8 +402,6 @@ public function totalComplaintByYear(int $year): array
 //     ];
 // }
 
-
-
 public function generateAndStorePdf () {
 
     $complaints = Complaint::all();
@@ -427,9 +414,7 @@ public function generateAndStorePdf () {
 
 }
 
-
-public function openTelescope(): array
-{
+public function openTelescope(): array{
 
     return [
         'url' => 'http://localhost:8000/telescope/requests',
@@ -437,36 +422,34 @@ public function openTelescope(): array
     ];
 }
 
-
 public function getAllComplaintVersion($complaint_id):array{
 
 
-$versions= ComplaintVersion::where('complaint_id' ,$complaint_id )->get();
+    $versions= ComplaintVersion::where('complaint_id' ,$complaint_id )->get();
 
 
-   foreach ($versions as $version) {
-$complaintType= ComplaintType::where('id',$version->complaint_type_id)->value('type');
-$complaintDepartment= ComplaintDepartment::where('id',$version->complaint_department_id)->value('department_name');
-$complaintStatus= ComplaintStatus::where('id',$version->complaint_status_id)->value('status');
+    foreach ($versions as $version) {
+    $complaintType= ComplaintType::where('id',$version->complaint_type_id)->value('type');
+    $complaintDepartment= ComplaintDepartment::where('id',$version->complaint_department_id)->value('department_name');
+    $complaintStatus= ComplaintStatus::where('id',$version->complaint_status_id)->value('status');
 
-        $version_det [] = [
-            'id' => $version['id'],
-            'complaint_id' =>$version['complaint_id'],
-            'complaint_type' => $complaintType,
-            'complaint_department' => $complaintDepartment,
-            'complaint_status' => $complaintStatus,
-            'location' => $version['location'],
-            'problem_description' => $version['problem_description'],
-            'editor_name' => $version ['editor_name'],
-            'editor_role' => $version ['editor_role'],
-            'what_edit' => $version ['what_edit'] ,
-            'note' => $version ['note']
-        ];
-    }
-$message = 'all versions are retrived successfully';
+            $version_det [] = [
+                'id' => $version['id'],
+                'complaint_id' =>$version['complaint_id'],
+                'complaint_type' => $complaintType,
+                'complaint_department' => $complaintDepartment,
+                'complaint_status' => $complaintStatus,
+                'location' => $version['location'],
+                'problem_description' => $version['problem_description'],
+                'editor_name' => $version ['editor_name'],
+                'editor_role' => $version ['editor_role'],
+                'what_edit' => $version ['what_edit'] ,
+                'note' => $version ['note']
+            ];
+        }
+    $message = 'all versions are retrived successfully';
 
-return ['versions' =>  $version_det , 'message' => $message];
+    return ['versions' =>  $version_det , 'message' => $message];
 }
-
 
 }

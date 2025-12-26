@@ -100,13 +100,29 @@ class ComplaintService
             $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
 
             $attachments = [] ;
+                // foreach ($complaintVersion->complaintAttachments ?? $complaint->complaintAttachments as $complaintAttachment) {
+                //     $attachments [] = [
+                //         'id' => $complaintAttachment->id ,
+                //         'attachment' => url(Storage::url($complaintAttachment->attachment))
+                //     ];
+                // }
 
-                foreach ($complaintVersion->complaintAttachments ?? $complaint->complaintAttachments as $complaintAttachment) {
-                    $attachments [] = [
-                        'id' => $complaintAttachment->id ,
-                        'attachment' => url(Storage::url($complaintAttachment->attachment))
-                    ];
+                $attachmentsQuery = ComplaintAttachment::where('complaint_id', $complaintId);
+
+                if ($complaintVersion) {
+                    $attachmentsQuery->where(function ($q) use ($complaintVersion) {
+                        $q->whereNull('complaint_version_id')
+                        ->orWhere('complaint_version_id', '<=', $complaintVersion->id);
+                    });
                 }
+
+                $attachments = $attachmentsQuery->get()->map(function ($attachment) {
+                    return [
+                        'id' => $attachment->id,
+                        'attachment' => url(Storage::url($attachment->attachment)),
+                    ];
+                })->toArray();
+
 
                 $complaint_det = [
                     'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
