@@ -86,13 +86,15 @@ public function viewComplaintDetailsEmployeeDepartmemt($complaintId): array{
 public function editComplaintStatus($request , $complaintId): array{
 
     $complaint =  Complaint::find($complaintId);
+    $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
+
     $employeeId = Employee::where('user_id', Auth::id())->value('id');
 
         if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
             throw new Exception("You cannot edit this complaint. It is locked by another employee.", 409);
         }
     $user = Auth::user();
-    $userRole = Role::where('id', $user->id)->value('name');
+    $userRole = Role::where('id', $user->role_id)->value('name');
    //   $complaint['complaint_status_id']	= $request['complaint_status_id'];
    //   $complaint->save();
 
@@ -103,9 +105,9 @@ public function editComplaintStatus($request , $complaintId): array{
         'user_id' => $complaint -> user_id,
         'complaint_department_id' => $complaint->complaint_department_id,
         'complaint_status_id'=> $request['complaint_status_id'] ,
-        'problem_description' => $complaint ->problem_description,
-        'location' => $complaint -> location,
-        'complaint_id' => $complaint ->id,
+        'problem_description' => $complaintVersion->problem_description ?? $complaint->problem_description,
+        'location' => $complaint->location,
+        'complaint_id' => $complaint->id,
         'editor_id' => $user->id,
         'editor_name' => $user->name,
         'editor_role' => $userRole,
@@ -134,52 +136,55 @@ public function editComplaintStatus($request , $complaintId): array{
 
         // add notes about complaint
 public function addNotesAboutComplaint($request , $complaintId): array{
-$user = Auth::user();
-$userRole = Role::where('id', $user->id)->value('name');
-$employeeId = Employee::where('user_id' , $user->id)->value('id');
+    $user = Auth::user();
+    $userRole = Role::where('id', $user->role_id)->value('name');
+    $employeeId = Employee::where('user_id' , $user->id)->value('id');
+    $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
 
-$complaint = Complaint::find($complaintId);
+    $complaint = Complaint::find($complaintId);
 
-    if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
-            throw new Exception("This complaint is locked by another employee.", 409);
-    }
+        if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
+                throw new Exception("This complaint is locked by another employee.", 409);
+        }
 
-$request->validate(['note' => 'required']);
+    $request->validate(['note' => 'required']);
 
- $newversion = ComplaintVersion:: create([
-        'complaint_type_id' => $complaint ->complaint_type_id,
-        'user_id' => $complaint -> user_id,
-        'complaint_department_id' => $complaint->complaint_department_id,
-        'complaint_status_id'=> $complaint->complaint_status_id ,
-        'problem_description' => $complaint ->problem_description,
-        'location' => $complaint -> location,
-        'complaint_id' => $complaint ->id,
-        'editor_id' => $user->id,
-        'editor_name' => $user->name,
-        'editor_role' => $userRole,
-        'note' => $request['note'],
-        'what_edit' => 'إضافة ملاحظة '
-   ]);
+    $newversion = ComplaintVersion:: create([
+            'complaint_type_id' => $complaint ->complaint_type_id,
+            'user_id' => $complaint -> user_id,
+            'complaint_department_id' => $complaint->complaint_department_id,
+            'complaint_status_id'=> $complaintVersion->complaint_status_id ?? $complaint->complaint_status_id ,
+            'problem_description' => $complaintVersion->problem_description ?? $complaint->problem_description,
+            'location' => $complaint->location,
+            'complaint_id' => $complaint ->id,
+            'editor_id' => $user->id,
+            'editor_name' => $user->name,
+            'editor_role' => $userRole,
+            'note' => $request['note'],
+            'what_edit' => 'إضافة ملاحظة '
+    ]);
 
-    $newversion -> save();
+        $newversion -> save();
 
 
-// $note = Note::create([
-//     'note' => $request['note'],
-//     'complaint_id' => $complaintId,
-//     'employee_id' => $employeeId
-// ]);
-$complaint->unlock();
-$message = 'note for complaint are added succesfully';
-    return ['newversion' => $newversion , 'message' => $message];
+    // $note = Note::create([
+    //     'note' => $request['note'],
+    //     'complaint_id' => $complaintId,
+    //     'employee_id' => $employeeId
+    // ]);
+    $complaint->unlock();
+    $message = 'note for complaint are added succesfully';
+        return ['newversion' => $newversion , 'message' => $message];
 }
 
      //request additional information
     public function requestAdditionalInfo($request, $complaintId): array{
 
         $complaint = Complaint::findOrFail($complaintId);
+        $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
+
         $user = Auth::user();
-        $userRole = Role::where('id', $user->id)->value('name');
+        $userRole = Role::where('id', $user->role_id)->value('name');
 
         $employeeId = Employee::where('user_id', $user->id)->value('id');
 
@@ -208,8 +213,8 @@ $message = 'note for complaint are added succesfully';
             'complaint_type_id' => $complaint->complaint_type_id,
             'user_id' => $complaint->user_id,
             'complaint_department_id' => $complaint->complaint_department_id,
-            'complaint_status_id'=> $complaint->complaint_status_id,
-            'problem_description' => $complaint->problem_description,
+            'complaint_status_id'=> $complaintVersion->complaint_status_id ?? $complaint->complaint_status_id,
+            'problem_description' => $complaintVersion->problem_description ?? $complaint->problem_description,
             'location' => $complaint->location,
             'complaint_id' => $complaint->id,
             'editor_id' => $user->id,
