@@ -25,13 +25,9 @@ use Illuminate\Http\Request;
 
 class ComplaintService
 {
-
-
     use GetComplaintDepartment;
-
-
         // add new complaint
-        public function addComplaint($request): array{
+    public function addComplaint($request): array{
 
             $user = Auth::user();
 
@@ -74,22 +70,22 @@ class ComplaintService
 
              $message = 'new complaint created succesfully';
              return ['complaint' => $all , 'message' => $message];
-        }
+    }
 
         // show my complaints
         public function viewMyComplaints(): array{
             $user = Auth::user();
             $complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('user_id' , $user->id)->get();
-
             $complaint_det = [];
-
             foreach ($complaints as $complaint) {
+                $complaintVersion = ComplaintVersion::where('complaint_id' , $complaint->id)->latest()->first();
+
                 $complaint_det [] = [
-                    'id' => $complaint['id'],
+                    'id' => $complaintVersion->id ?? $complaint['id'],
                     'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
                     'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
                     'location' => $complaint['location'],
-                    'complaint_status' => ['id' => $complaint->complaintStatus['id'] , 'status' => $complaint->complaintStatus['status']],
+                    'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
                 ];
             }
 
@@ -101,9 +97,11 @@ class ComplaintService
         public function viewComplaintDetails($complaintId): array{
             $complaint =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus' , 'complaintAttachments')->find($complaintId);
 
+            $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
+
             $attachments = [] ;
 
-                foreach ($complaint->complaintAttachments as $complaintAttachment) {
+                foreach ($complaintVersion->complaintAttachments ?? $complaint->complaintAttachments as $complaintAttachment) {
                     $attachments [] = [
                         'id' => $complaintAttachment->id ,
                         'attachment' => url(Storage::url($complaintAttachment->attachment))
@@ -114,8 +112,8 @@ class ComplaintService
                     'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
                     'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
                     'location' => $complaint['location'],
-                    'problem_description' => $complaint['problem_description'],
-                    'complaint_status' => ['id' => $complaint->complaintStatus['id'] , 'status' => $complaint->complaintStatus['status']],
+                    'problem_description' => $complaintVersion->problem_description ?? $complaint['problem_description'],
+                    'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
                     'attachments' => $attachments
                 ];
 
@@ -144,7 +142,9 @@ public function getComplaintDepartment():array{
     //response additional information
     public function responsedToAdditionalInfo($request , $complaintId): array{
         $user = Auth::user();
-        $userRole = Role::where('id', $user->id)->value('name');
+        $userRole = Role::where('id', $user->role_id)->value('name');
+        $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
+
 
         $complaint = Complaint::where('id', $complaintId)
             ->where('user_id', $user->id)
@@ -164,7 +164,7 @@ public function getComplaintDepartment():array{
             'complaint_id' => $complaint->id,
             'complaint_type_id' => $complaint->complaint_type_id,
             'complaint_department_id' => $complaint->complaint_department_id,
-            'complaint_status_id' => $complaint->complaint_status_id,
+            'complaint_status_id' => $complaintVersion->complaint_status_id ?? $complaint->complaint_status_id,
             'user_id' => $complaint->user_id,
             'problem_description' => $request->problem_description ?? $complaint->problem_description,
             'location' => $complaint->location,
@@ -175,10 +175,7 @@ public function getComplaintDepartment():array{
         ]);
 
         if ($request->hasFile('attachments')) {
-            echo "Ddd";
             foreach ($request->file('attachments') as $file) {
-                                echo "vvd";
-
                     $path = $file->store('uploads/complaints', 'public');
 
             $ss = ComplaintAttachment::create([
