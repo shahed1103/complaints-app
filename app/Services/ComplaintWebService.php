@@ -24,6 +24,7 @@ use Spatie\LaravelPdf\Facades\Pdf;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\FcmController;
 use Illuminate\Http\Request;
+use App\Support\ComplaintTransactional;
 
 class ComplaintWebService
 {
@@ -85,14 +86,17 @@ public function viewComplaintDetailsEmployeeDepartmemt($complaintId): array{
         // edit complaint status
 public function editComplaintStatus($request , $complaintId): array{
 
-    $complaint =  Complaint::find($complaintId);
-    $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
+    // $complaint =  Complaint::find($complaintId);
+    return ComplaintTransactional::run($complaintId, function ($complaint) use ($request) {
 
     $employeeId = Employee::where('user_id', Auth::id())->value('id');
 
         if ($complaint->isLocked() && $complaint->locked_by != $employeeId) {
             throw new Exception("You cannot edit this complaint. It is locked by another employee.", 409);
         }
+
+    $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
+
     $user = Auth::user();
     $userRole = Role::where('id', $user->role_id)->value('name');
    //   $complaint['complaint_status_id']	= $request['complaint_status_id'];
@@ -116,9 +120,15 @@ public function editComplaintStatus($request , $complaintId): array{
 
         $newversion -> save();
         $complaint->unlock();
-        ////////////////
-        $user = User::where('id', $complaint->user_id)->first();
+        return [
+            'newversion' => $newversion,
+            'user_id' => $complaint->user_id
+        ];
+    });
 
+      ////////////////
+        // $user = User::where('id', $complaint->user_id)->first();
+        $user = User::find($result['user_id']);
         if ($user && $user->fcm_token) {
                      $fcmController = new FcmController();
                      $fakeRequest = new Request([
@@ -128,9 +138,10 @@ public function editComplaintStatus($request , $complaintId): array{
                      $fcmController->sendFcmNotification($fakeRequest);
         }
         ///////////////
+
         $message = 'statuse changed succesfully';
-        return ['newComplaintVersion' => $newversion , 'message' => $message];
-}
+        return ['newComplaintVersion' => $result['newversion'] , 'message' => $message];
+    }
 
         // add notes about complaint
 public function addNotesAboutComplaint($request , $complaintId): array{
