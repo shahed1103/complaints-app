@@ -26,7 +26,7 @@ use Illuminate\Http\Request;
 class ComplaintService
 {
     use GetComplaintDepartment;
-        // add new complaint
+    // add new complaint
     public function addComplaint($request): array{
 
             $user = Auth::user();
@@ -72,69 +72,68 @@ class ComplaintService
              return ['complaint' => $all , 'message' => $message];
     }
 
-        // show my complaints
-        public function viewMyComplaints(): array{
-            $user = Auth::user();
-            $complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('user_id' , $user->id)->get();
-            $complaint_det = [];
-            foreach ($complaints as $complaint) {
-                $complaintVersion = ComplaintVersion::where('complaint_id' , $complaint->id)->latest()->first();
+    // show my complaints
+    public function viewMyComplaints(): array{
+        $user = Auth::user();
+        $complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('user_id' , $user->id)->get();
+        $complaint_det = [];
+        foreach ($complaints as $complaint) {
+            $complaintVersion = ComplaintVersion::where('complaint_id' , $complaint->id)->latest()->first();
 
-                $complaint_det [] = [
-                    'id' => $complaintVersion->id ?? $complaint['id'],
-                    'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
-                    'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
-                    'location' => $complaint['location'],
-                    'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
-                ];
+            $complaint_det [] = [
+                'id' => $complaintVersion->id ?? $complaint['id'],
+                'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
+                'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
+                'location' => $complaint['location'],
+                'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
+            ];
+        }
+
+            $message = 'your complaints are retrived succesfully';
+            return ['complaints' => $complaint_det , 'message' => $message];
+    }
+
+    // show complaint details
+    public function viewComplaintDetails($complaintId): array{
+        $complaint =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus' , 'complaintAttachments')->find($complaintId);
+
+        $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
+
+        $attachments = [] ;
+            $attachmentsQuery = ComplaintAttachment::where('complaint_id', $complaintId);
+
+            if ($complaintVersion) {
+                $attachmentsQuery->where(function ($q) use ($complaintVersion) {
+                    $q->whereNull('complaint_version_id')
+                    ->orWhere('complaint_version_id', '<=', $complaintVersion->id);
+                });
             }
 
-             $message = 'your complaints are retrived succesfully';
-             return ['complaints' => $complaint_det , 'message' => $message];
-        }
-
-        // show complaint details
-        public function viewComplaintDetails($complaintId): array{
-            $complaint =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus' , 'complaintAttachments')->find($complaintId);
-
-            $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
-
-            $attachments = [] ;
-                $attachmentsQuery = ComplaintAttachment::where('complaint_id', $complaintId);
-
-                if ($complaintVersion) {
-                    $attachmentsQuery->where(function ($q) use ($complaintVersion) {
-                        $q->whereNull('complaint_version_id')
-                        ->orWhere('complaint_version_id', '<=', $complaintVersion->id);
-                    });
-                }
-
-                $attachments = $attachmentsQuery->get()->map(function ($attachment) {
-                    return [
-                        'id' => $attachment->id,
-                        'attachment' => url(Storage::url($attachment->attachment)),
-                    ];
-                })->toArray();
-
-
-                $complaint_det = [
-                    'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
-                    'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
-                    'location' => $complaint['location'],
-                    'problem_description' => $complaintVersion->problem_description ?? $complaint['problem_description'],
-                    'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
-                    'attachments' => $attachments
+            $attachments = $attachmentsQuery->get()->map(function ($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'attachment' => url(Storage::url($attachment->attachment)),
                 ];
+            })->toArray();
 
-             $message = 'complaint details are retrived succesfully';
-             return ['complaint' => $complaint_det , 'message' => $message];
-        }
+
+            $complaint_det = [
+                'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
+                'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
+                'location' => $complaint['location'],
+                'problem_description' => $complaintVersion->problem_description ?? $complaint['problem_description'],
+                'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
+                'attachments' => $attachments
+            ];
+
+            $message = 'complaint details are retrived succesfully';
+            return ['complaint' => $complaint_det , 'message' => $message];
+    }
 
     //3 view all departments
-    
-public function getComplaintDepartment():array{
-        return $this->getComplaintDepartment();
-}
+    public function getComplaintDepartment():array{
+            return $this->getComplaintDepartment();
+    }
 
     //4 view all ComplaintType
     public function getComplaintType():array{
@@ -145,7 +144,7 @@ public function getComplaintDepartment():array{
         $message = 'all types are retrived successfully';
 
         return ['gender' =>  $types , 'message' => $message];
-     }
+    }
 
 
     //response additional information
