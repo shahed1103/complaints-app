@@ -22,10 +22,10 @@ use Illuminate\Support\Facades\File;
 use App\Traits\GetComplaintDepartment;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Illuminate\Support\Carbon;
-use App\Http\Controllers\FcmController;
 use Illuminate\Http\Request;
 use App\Support\ComplaintTransactional;
 use App\Repositories\Complaint\ComplaintRepositoryInterface;
+use App\Jobs\SendFcmNotificationJob;
 
 class ComplaintWebService
 {
@@ -123,17 +123,11 @@ class ComplaintWebService
             ];
         });
 
-        ////////////////
+        //Notification
             $user = User::find($result['user_id']);
             if ($user && $user->fcm_token) {
-                        $fcmController = new FcmController();
-                        $fakeRequest = new Request([
-                            'user_id' => $user->id,
-                            'title' => "تم التعديل على حالة شكواك",
-                        ]);
-                        $fcmController->sendFcmNotification($fakeRequest);
+                    SendFcmNotificationJob::dispatch($user->id, 'تم تعديل حالة شكواك');
             }
-            ///////////////
 
         $this->complaints->clearComplaintDetailsCache($complaintId);
         $this->complaints->clearUserComplaintsCache($result['user_id']);
@@ -251,10 +245,7 @@ class ComplaintWebService
             $complaintUser = User::find($result['user_id']);
 
             if ($complaintUser && $complaintUser->fcm_token) {
-                (new FcmController())->sendFcmNotification(new Request([
-                    'user_id' => $complaintUser->id,
-                    'title' => 'تم طلب معلومات إضافية بخصوص شكواك'
-                ]));
+                SendFcmNotificationJob::dispatch($complaintUser->id, 'تم طلب معلومات إضافية بخصوص شكواك');
             }
 
             $message = 'Additional information requested successfully';

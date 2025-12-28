@@ -8,7 +8,6 @@ use App\Models\Complaint;
 use App\Models\ComplaintAttachment;
 use App\Models\ComplaintDepartment;
 use App\Models\ComplaintVersion;
-// use App\Models\ComplaintType;
 use App\Models\AdditionalInfo;
 use App\Models\Employee;
 use Spatie\Permission\Models\Role;
@@ -19,9 +18,9 @@ use Exception;
 use Storage;
 use App\Traits\GetComplaintDepartment;
 use Illuminate\Support\Facades\File;
-use App\Http\Controllers\FcmController;
 use Illuminate\Http\Request;
 use App\Repositories\Complaint\ComplaintRepositoryInterface;
+use App\Jobs\SendFcmNotificationJob;
 
 
 class ComplaintService
@@ -59,16 +58,10 @@ class ComplaintService
 
             }
 
-            ///////////
+            //Notification
                if ($user && $user->fcm_token) {
-                     $fcmController = new FcmController();
-                     $fakeRequest = new Request([
-                        'user_id' => $user->id,
-                        'title' => "تم استلام شكواك وسيتم مراجعتها",
-                     ]);
-                     $fcmController->sendFcmNotification($fakeRequest);
+                SendFcmNotificationJob::dispatch($user->id , 'تم استلام شكواك وسيتم مراجعتها من قبل الفريق المختص');
                }
-            //////////
 
             $all = ['complaint' => $newComplaint , 'attachments' => $files];
             $this->complaints->clearUserComplaintsCache($user->id);
@@ -159,10 +152,7 @@ class ComplaintService
         // Notification
             $employee = Employee::with('user')->find($additionalInfo->employee_id);
             if ($employee->user && $employee->user->fcm_token) {
-                (new FcmController())->sendFcmNotification(new Request([
-                    'user_id' => $employee->user->id,
-                    'title' => 'تم إضافة المعلومات المطلوبة'
-                ]));
+                    SendFcmNotificationJob::dispatch($employee->user->id, 'تم اضافة المعلومات المطلوبة');
             }
 
         $this->complaints->clearComplaintDetailsCache($complaintId);
