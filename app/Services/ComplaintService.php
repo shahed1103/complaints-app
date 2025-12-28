@@ -21,6 +21,7 @@ use App\Traits\GetComplaintDepartment;
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\FcmController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 
 class ComplaintService
@@ -67,6 +68,7 @@ class ComplaintService
             //////////
 
             $all = ['complaint' => $newComplaint , 'attachments' => $files];
+            Cache::forget("user_{$user->id}_complaints");
 
              $message = 'new complaint created succesfully';
              return ['complaint' => $all , 'message' => $message];
@@ -74,30 +76,58 @@ class ComplaintService
 
     // show my complaints
     public function viewMyComplaints(): array{
-        $user = Auth::user();
-        $complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('user_id' , $user->id)->get();
-        $complaint_det = [];
-        foreach ($complaints as $complaint) {
-            $complaintVersion = ComplaintVersion::where('complaint_id' , $complaint->id)->latest()->first();
+        $userId = Auth::id();
+        $complaints = Cache::remember(
+            "user_{$userId}_complaints",
+            300, // 5 minutes
+            function () use ($userId) {
 
-            $complaint_det [] = [
-                'id' => $complaintVersion->id ?? $complaint['id'],
-                'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
-                'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
-                'location' => $complaint['location'],
-                'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
-            ];
-        }
+                $complaints = Complaint::with(['complaintType:id,type','complaintDepartment:id,department_name', 'complaintStatus:id,status'])
+                                        ->where('user_id', $userId)
+                                        ->get();
 
-            $message = 'your complaints are retrived succesfully';
-            return ['complaints' => $complaint_det , 'message' => $message];
+                $latestVersions = ComplaintVersion::with('complaintStatus:id,status')
+                                                    ->whereIn('complaint_id', $complaints->pluck('id'))
+                                                    ->latest('id')
+                                                    ->get()
+                                                    ->groupBy('complaint_id');
+
+                return $complaints->map(function ($complaint) use ($latestVersions) {
+
+                $version = $latestVersions[$complaint->id][0] ?? null;
+
+                return [
+                        'id' => $version->id ?? $complaint->id,
+                        'complaint_type' => ['id' => $complaint->complaintType->id ,'type' => $complaint->complaintType->type],
+                        'complaint_department' => ['id' => $complaint->complaintDepartment->id,'department_name' => $complaint->complaintDepartment->department_name],
+                        'location' => $complaint->location,
+                        'complaint_status' => ['id' => $version->complaintStatus->id ?? $complaint->complaintStatus->id,'status' => $version->complaintStatus->status ?? $complaint->complaintStatus->status],
+                    ];
+                })->values()->toArray();
+            }
+        );
+        $message = 'your complaints are retrieved successfully';
+        return ['complaints' => $complaints ,'message' => $message];
     }
 
     // show complaint details
     public function viewComplaintDetails($complaintId): array{
-        $complaint =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus' , 'complaintAttachments')->find($complaintId);
 
-        $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
+        $complaint_det = Cache::remember(
+            "complaint_details_{$complaintId}",
+            300, // 5 minutes
+            function () use ($complaintId) {
+
+        $complaint = Complaint::with([
+                        'complaintType:id,type',
+                        'complaintDepartment:id,department_name',
+                        'complaintStatus:id,status',
+                    ])->findOrFail($complaintId);
+
+        $complaintVersion = ComplaintVersion::with('complaintStatus:id,status')
+                ->where('complaint_id', $complaintId)
+                ->latest('id')
+                ->first();
 
         $attachments = [] ;
             $attachmentsQuery = ComplaintAttachment::where('complaint_id', $complaintId);
@@ -117,7 +147,7 @@ class ComplaintService
             })->toArray();
 
 
-            $complaint_det = [
+            return [
                 'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
                 'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
                 'location' => $complaint['location'],
@@ -125,7 +155,7 @@ class ComplaintService
                 'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
                 'attachments' => $attachments
             ];
-
+        });
             $message = 'complaint details are retrived succesfully';
             return ['complaint' => $complaint_det , 'message' => $message];
     }
@@ -136,14 +166,19 @@ class ComplaintService
     }
 
     //4 view all ComplaintType
-    public function getComplaintType():array{
-        $complaintTypes = ComplaintType::all();
-        foreach ($complaintTypes as $complaintType) {
-            $types [] = ['id' => $complaintType->id  , 'type' => $complaintType->type];
-        }
-        $message = 'all types are retrived successfully';
+    public function getComplaintType(): array{
+        $types = Cache::remember('complaint_types', 86400, // 24 hours
+            function () {
+                return ComplaintType::select('id', 'type')
+                    ->orderBy('type')
+                    ->get()
+                    ->map(function ($type) {
+                        return ['id'   => $type->id ,'type' => $type->type];
+                    })->toArray();
+                }
+            );
 
-        return ['gender' =>  $types , 'message' => $message];
+            return ['types'   => $types ,'message' => 'all types are retrieved successfully'];
     }
 
 
@@ -207,6 +242,9 @@ class ComplaintService
                     'title' => 'تم إضافة المعلومات المطلوبة'
                 ]));
             }
+
+        Cache::forget("complaint_details_{$complaintId}");
+        Cache::forget("user_{$complaint->user_id}_complaints");
 
         $message = 'Additional information responsed successfully';
         return ['info_response' => $ss,'message' => $message];

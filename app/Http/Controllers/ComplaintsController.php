@@ -82,7 +82,7 @@ class ComplaintsController extends Controller
         $data = [] ;
         try{
             $data = $this->complaintService->getComplaintType();
-           return Response::Success($data['gender'], $data['message']);
+           return Response::Success($data['types'], $data['message']);
         }
         catch(Throwable $th){
             $message = $th->getMessage();

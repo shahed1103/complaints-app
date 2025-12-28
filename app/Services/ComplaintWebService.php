@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
 use App\Http\Controllers\FcmController;
 use Illuminate\Http\Request;
 use App\Support\ComplaintTransactional;
+use Illuminate\Support\Facades\Cache;
 
 class ComplaintWebService
 {
@@ -134,6 +135,9 @@ class ComplaintWebService
             }
             ///////////////
 
+            Cache::forget("complaint_details_{$complaintId}");
+            Cache::forget("user_{$complaint->user_id}_complaints");
+
             $message = 'statuse changed succesfully';
             return ['newComplaintVersion' => $result['newversion'] , 'message' => $message];
     }
@@ -175,6 +179,10 @@ class ComplaintWebService
         $complaint->unlock();
         return $newVersion;
         });
+
+        Cache::forget("complaint_details_{$complaintId}");
+        Cache::forget("user_{$complaint->user_id}_complaints");
+
         $message = 'note for complaint are added succesfully';
         return ['newversion' => $result , 'message' => $message];
     }
@@ -298,7 +306,6 @@ class ComplaintWebService
         $message = 'Employee added succesfully';
         return ['employee' => $employee , 'message' => $message];
     }
-
 
     public function getAllEmployees():array{
 
