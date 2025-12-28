@@ -33,6 +33,7 @@ Route::controller(AuthController::class)->group(function(){
     ->name('user.otp.code.check');
 
     Route::post('signin' , 'signin')
+    ->middleware('throttle:login')
     ->name('user.signin');
 
     Route::get('resendOtp/{userId}' , 'resendOtp')

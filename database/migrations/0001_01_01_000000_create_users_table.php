@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->integer('role_id')->unsigned();
+            $table->unsignedTinyInteger('failed_login_attempts')->default(0);
+            $table->timestamp('locked_until')->nullable();
             $table->string('name');
             $table->string('email')->unique()->nullable();
             $table->string('phone')->unique()->nullable();

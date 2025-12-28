@@ -7,7 +7,6 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Throwable;
 use Illuminate\Http\JsonResponse;
-
 use App\Http\Responses\response;
 
 class Handler extends ExceptionHandler

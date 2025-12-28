@@ -20,6 +20,8 @@ use HasApiTokens, HasFactory, Notifiable , HasRoles;
      */
     protected $fillable = [
         'role_id',
+        'failed_login_attempts',
+        'locked_until',
         'name',
         'email',
         'password',

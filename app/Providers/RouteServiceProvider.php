@@ -7,6 +7,7 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use App\Http\Responses\response;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,22 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::perMinutes(10, 5)
+                ->by(strtolower($request->input('emailOrPhone')).'|'.$request->ip())
+                ->response(function () {
+                    $data = null;
+                    $message = 'تم تجاوز عدد محاولات تسجيل الدخول المسموح بها. الرجاء المحاولة لاحقًا.';
+
+                    $errors = [
+                        'throttle' => ['Too many login attempts']
+                    ];
+                    $code = 429;
+                    return Response::ErrorX($data, $message, $errors, $code);
+            });
+        });
+
+            
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')

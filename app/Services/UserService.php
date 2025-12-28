@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\File;
 use App\Jobs\SendOtpEmailJob;
 use App\Jobs\SendWhatsappOtpJob;
 use App\Jobs\SendResetPasswordCodeJob;
+use App\Jobs\SendFailedLoginAlertJob;
 
 
 class UserService
@@ -127,9 +128,30 @@ class UserService
             throw new Exception("User not found.", 404);
         }
 
+        if ($user->locked_until && now()->lessThan($user->locked_until)) {
+        throw new Exception("الحساب مقفل مؤقتًا بسبب محاولات دخول فاشلة متكررة.", 423);
+        }   
+
         if (!Hash::check($request->password, $user->password)) {
-            throw new Exception("User information does not with our record.", 401);
+
+        $user->increment('failed_login_attempts');
+
+        if ($user->failed_login_attempts >= 4) {
+            $user->update([
+                'locked_until' => now()->addMinutes(10),
+                'failed_login_attempts' => 0,
+            ]);
+
+            SendFailedLoginAlertJob::dispatch($user);
         }
+
+        throw new Exception("User information does not with our record.", 401);
+        }
+
+        $user->update([
+            'failed_login_attempts' => 0,
+            'locked_until' => null,
+        ]);
 
         if (!$user->is_verified) {
             throw new Exception("يجب تفعيل الحساب عبر رمز التحقق قبل تسجيل الدخول.", 403);
