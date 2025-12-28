@@ -17,9 +17,7 @@ class SendFcmNotificationJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private int $userId , private string $title 
-    //, private string $body
-    ) {}
+    public function __construct(private int $userId , private string $title , private string $body) {}
 
     /**
      * Execute the job.
@@ -29,7 +27,7 @@ class SendFcmNotificationJob implements ShouldQueue
         $request = new Request([
             'user_id' => $this->userId,
             'title'   => $this->title,
-            // 'body'    => $this->body,
+            'body'    => $this->body,
         ]);
 
         (new FcmController())->sendFcmNotification($request);

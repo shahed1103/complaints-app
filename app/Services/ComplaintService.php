@@ -60,7 +60,7 @@ class ComplaintService
 
             //Notification
                if ($user && $user->fcm_token) {
-                SendFcmNotificationJob::dispatch($user->id , 'تم استلام شكواك وسيتم مراجعتها من قبل الفريق المختص');
+                SendFcmNotificationJob::dispatch($user->id , 'تم استلام شكواك وسيتم مراجعتها من قبل الفريق المختص' , "رقم الشكوى : {$newComplaint->id}");
                }
 
             $all = ['complaint' => $newComplaint , 'attachments' => $files];
@@ -152,7 +152,7 @@ class ComplaintService
         // Notification
             $employee = Employee::with('user')->find($additionalInfo->employee_id);
             if ($employee->user && $employee->user->fcm_token) {
-                    SendFcmNotificationJob::dispatch($employee->user->id, 'تم اضافة المعلومات المطلوبة');
+                    SendFcmNotificationJob::dispatch($employee->user->id, 'تم اضافة المعلومات المطلوبة' , "رقم الشكوى : $complaintId \n تاريخ الرد : $additionalInfo->answered_at");
             }
 
         $this->complaints->clearComplaintDetailsCache($complaintId);

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('title');
-            // $table->text('body');
+            $table->text('body');
             $table->boolean('read_at')->default(false);
             $table->timestamps();
 

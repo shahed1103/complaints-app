@@ -95,7 +95,7 @@ class ComplaintWebService
                 throw new Exception("You cannot edit this complaint. It is locked by another employee.", 409);
             }
 
-        $complaintVersion = ComplaintVersion::where('complaint_id' , $complaint->id)->latest()->first();
+        $complaintVersion = ComplaintVersion::with('complaintStatus:id,status')->where('complaint_id' , $complaint->id)->latest()->first();
 
         $user = Auth::user();
         $userRole = Role::where('id', $user->role_id)->value('name');
@@ -126,7 +126,8 @@ class ComplaintWebService
         //Notification
             $user = User::find($result['user_id']);
             if ($user && $user->fcm_token) {
-                    SendFcmNotificationJob::dispatch($user->id, 'تم تعديل حالة شكواك');
+                    $status = $result['newversion']->complaintStatus->status;
+                    SendFcmNotificationJob::dispatch($user->id, 'تم تعديل حالة شكواك' , "رقم الشكوى : $complaintId \n حالة الشكوى : $status");
             }
 
         $this->complaints->clearComplaintDetailsCache($complaintId);
@@ -245,7 +246,7 @@ class ComplaintWebService
             $complaintUser = User::find($result['user_id']);
 
             if ($complaintUser && $complaintUser->fcm_token) {
-                SendFcmNotificationJob::dispatch($complaintUser->id, 'تم طلب معلومات إضافية بخصوص شكواك');
+                SendFcmNotificationJob::dispatch($complaintUser->id, 'تم طلب معلومات إضافية بخصوص شكواك' , "رقم الشكوى : $complaintId \n تاريخ الطلب : {$result['infoRequest']->requested_at}");
             }
 
             $message = 'Additional information requested successfully';
