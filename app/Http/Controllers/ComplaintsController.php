@@ -68,7 +68,7 @@ class ComplaintsController extends Controller
         $data = [] ;
         try{
             $data = $this->complaintService->getComplaintDepartment();
-           return Response::Success($data['cities'], $data['message']);
+           return Response::Success($data['departments'], $data['message']);
         }
         catch(Throwable $th){
             $message = $th->getMessage();
@@ -92,7 +92,7 @@ class ComplaintsController extends Controller
     }
 
     //response additional information
-        public function responsedToAdditionalInfo(AdditionalInfoResponse $request, $complaintId): JsonResponse{
+    public function responsedToAdditionalInfo(AdditionalInfoResponse $request, $complaintId): JsonResponse{
         $data = [] ;
         try{
             $data = $this->complaintService->responsedToAdditionalInfo($request , $complaintId);

@@ -25,13 +25,13 @@ use Illuminate\Support\Carbon;
 use App\Http\Controllers\FcmController;
 use Illuminate\Http\Request;
 use App\Support\ComplaintTransactional;
-use Illuminate\Support\Facades\Cache;
+use App\Repositories\Complaint\ComplaintRepositoryInterface;
 
 class ComplaintWebService
 {
 
     use GetComplaintDepartment;
-
+    public function __construct(private ComplaintRepositoryInterface $complaints) {}
 //////////////////////////////////////////////////////////////////////employee
     // show complaints for spicific employee departmemt
     public function viewComplaintsEmployeeDepartmemt(): array{
@@ -135,8 +135,8 @@ class ComplaintWebService
             }
             ///////////////
 
-            Cache::forget("complaint_details_{$complaintId}");
-            Cache::forget("user_{$complaint->user_id}_complaints");
+        $this->complaints->clearComplaintDetailsCache($complaintId);
+        $this->complaints->clearUserComplaintsCache($result['user_id']);
 
             $message = 'statuse changed succesfully';
             return ['newComplaintVersion' => $result['newversion'] , 'message' => $message];
@@ -159,7 +159,7 @@ class ComplaintWebService
 
         $complaintVersion = ComplaintVersion::where('complaint_id' , $complaint->id)->latest()->first();
 
-        $newversion = ComplaintVersion:: create([
+        $newVersion = ComplaintVersion:: create([
                 'complaint_type_id' => $complaint ->complaint_type_id,
                 'user_id' => $complaint -> user_id,
                 'complaint_department_id' => $complaint->complaint_department_id,
@@ -174,17 +174,22 @@ class ComplaintWebService
                 'what_edit' => 'إضافة ملاحظة '
         ]);
 
-        $newversion->save();
+        $newVersion->save();
 
         $complaint->unlock();
-        return $newVersion;
+
+        return [
+            'version' => $newVersion,
+            'user_id' => $complaint->user_id,
+        ];
+
         });
 
-        Cache::forget("complaint_details_{$complaintId}");
-        Cache::forget("user_{$complaint->user_id}_complaints");
+        $this->complaints->clearComplaintDetailsCache($complaintId);
+        $this->complaints->clearUserComplaintsCache($result['user_id']);
 
         $message = 'note for complaint are added succesfully';
-        return ['newversion' => $result , 'message' => $message];
+        return ['newversion' => $result['version'] , 'message' => $message];
     }
 
     //request additional information
@@ -259,7 +264,7 @@ class ComplaintWebService
 //////////////////////////////////////////////////////Admin
 
     public function viewComplaintDepartment():array{
-            return $this->getComplaintDepartment();
+            return $this->getComplaintDepartments();
     }
 
     public function viewComplaintsByDepartmemt($depId): array{

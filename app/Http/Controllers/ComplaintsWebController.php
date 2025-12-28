@@ -65,8 +65,8 @@ class ComplaintsWebController extends Controller
         }
     }
 
-        // add notes about complaint
-        public function addNotesAboutComplaint(Request $request , $complaintId): JsonResponse{
+    // add notes about complaint
+    public function addNotesAboutComplaint(Request $request , $complaintId): JsonResponse{
         $data = [] ;
         try{
             $data = $this->complaintWebService->addNotesAboutComplaint($request , $complaintId);
@@ -79,8 +79,9 @@ class ComplaintsWebController extends Controller
             return Response::ErrorX($data , $message , $errors , $code);
         }
     }
-     //request additional information
-        public function requestAdditionalInfo(AdditionalInfoRequest $request, $complaintId): JsonResponse{
+
+    //request additional information
+    public function requestAdditionalInfo(AdditionalInfoRequest $request, $complaintId): JsonResponse{
         $data = [] ;
         try{
             $data = $this->complaintWebService->requestAdditionalInfo($request , $complaintId);
@@ -93,7 +94,4 @@ class ComplaintsWebController extends Controller
             return Response::ErrorX($data , $message , $errors , $code);
         }
     }
-
-        /////
-    ///edit
 }
