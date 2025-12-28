@@ -68,7 +68,7 @@ class ComplaintsController extends Controller
         $data = [] ;
         try{
             $data = $this->complaintService->getComplaintDepartment();
-           return Response::Success($data['cities'], $data['message']);
+           return Response::Success($data['departments'], $data['message']);
         }
         catch(Throwable $th){
             $message = $th->getMessage();
@@ -82,7 +82,7 @@ class ComplaintsController extends Controller
         $data = [] ;
         try{
             $data = $this->complaintService->getComplaintType();
-           return Response::Success($data['gender'], $data['message']);
+           return Response::Success($data['types'], $data['message']);
         }
         catch(Throwable $th){
             $message = $th->getMessage();
@@ -92,18 +92,18 @@ class ComplaintsController extends Controller
     }
 
     //response additional information
-        public function responsedToAdditionalInfo(AdditionalInfoResponse $request, $complaintId): JsonResponse{
+    public function responsedToAdditionalInfo(AdditionalInfoResponse $request, $complaintId): JsonResponse{
         $data = [] ;
-        // try{
+        try{
             $data = $this->complaintService->responsedToAdditionalInfo($request , $complaintId);
            return Response::Success($data['info_response'], $data['message']);
-        // }
-        // catch(Throwable $th){
-        //     $message = $th->getMessage();
-        //     $errors [] = $message;
-        //     $code = $th->getCode() ?? 400;
-        //     return Response::ErrorX($data , $message , $errors , $code);
-        // }
+        }
+        catch(Throwable $th){
+            $message = $th->getMessage();
+            $errors [] = $message;
+            $code = $th->getCode() ?? 400;
+            return Response::ErrorX($data , $message , $errors , $code);
+        }
     }
 
 }

@@ -33,16 +33,16 @@ class AuthController extends Controller
 
     public function register(UserSignupRequest $request): JsonResponse {
         $data = [] ;
-        try{
+        // try{
             $data = $this->userService->register($request);
             return Response::Success($data['user'], $data['message']);
-        }
-        catch(Throwable $th){
-            $message = $th->getMessage();
-            $errors [] = $message;
-            $code = $th->getCode();
-            return Response::ErrorX($data , $message , $errors , $code); 
-        }
+        // }
+        // catch(Throwable $th){
+        //     $message = $th->getMessage();
+        //     $errors [] = $message;
+        //     $code = $th->getCode();
+        //     return Response::ErrorX($data , $message , $errors , $code); 
+        // }
     }
 
     public function checkOtpCode(CheckOtpCodeRequest $request , $userID): JsonResponse {

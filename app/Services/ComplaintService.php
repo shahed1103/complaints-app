@@ -8,7 +8,6 @@ use App\Models\Complaint;
 use App\Models\ComplaintAttachment;
 use App\Models\ComplaintDepartment;
 use App\Models\ComplaintVersion;
-use App\Models\ComplaintType;
 use App\Models\AdditionalInfo;
 use App\Models\Employee;
 use Spatie\Permission\Models\Role;
@@ -19,14 +18,18 @@ use Exception;
 use Storage;
 use App\Traits\GetComplaintDepartment;
 use Illuminate\Support\Facades\File;
-use App\Http\Controllers\FcmController;
 use Illuminate\Http\Request;
+use App\Repositories\Complaint\ComplaintRepositoryInterface;
+use App\Jobs\SendFcmNotificationJob;
 
 
 class ComplaintService
 {
     use GetComplaintDepartment;
-        // add new complaint
+
+    public function __construct(private ComplaintRepositoryInterface $complaints) {}
+
+    // add new complaint
     public function addComplaint($request): array{
 
             $user = Auth::user();
@@ -55,89 +58,44 @@ class ComplaintService
 
             }
 
-            ///////////
+            //Notification
                if ($user && $user->fcm_token) {
-                     $fcmController = new FcmController();
-                     $fakeRequest = new Request([
-                        'user_id' => $user->id,
-                        'title' => "تم استلام شكواك وسيتم مراجعتها",
-                     ]);
-                     $fcmController->sendFcmNotification($fakeRequest);
+                SendFcmNotificationJob::dispatch($user->id , 'تم استلام شكواك وسيتم مراجعتها من قبل الفريق المختص');
                }
-            //////////
 
             $all = ['complaint' => $newComplaint , 'attachments' => $files];
+            $this->complaints->clearUserComplaintsCache($user->id);
 
-             $message = 'new complaint created succesfully';
+              $message = 'new complaint created succesfully';
              return ['complaint' => $all , 'message' => $message];
     }
 
-        // show my complaints
-        public function viewMyComplaints(): array{
-            $user = Auth::user();
-            $complaints =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus')->where('user_id' , $user->id)->get();
-            $complaint_det = [];
-            foreach ($complaints as $complaint) {
-                $complaintVersion = ComplaintVersion::where('complaint_id' , $complaint->id)->latest()->first();
+    // show my complaints
+    public function viewMyComplaints(): array{
+        $userId = Auth::id();
+        $complaints = $this->complaints->getUserComplaints($userId);
+        $message = 'your complaints are retrieved successfully';
+        return ['complaints' => $complaints ,'message' => $message];
+    }
 
-                $complaint_det [] = [
-                    'id' => $complaintVersion->id ?? $complaint['id'],
-                    'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
-                    'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
-                    'location' => $complaint['location'],
-                    'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
-                ];
-            }
-
-             $message = 'your complaints are retrived succesfully';
-             return ['complaints' => $complaint_det , 'message' => $message];
-        }
-
-        // show complaint details
-        public function viewComplaintDetails($complaintId): array{
-            $complaint =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus' , 'complaintAttachments')->find($complaintId);
-
-            $complaintVersion = ComplaintVersion::where('complaint_id' , $complaintId)->latest()->first();
-
-            $attachments = [] ;
-
-                foreach ($complaintVersion->complaintAttachments ?? $complaint->complaintAttachments as $complaintAttachment) {
-                    $attachments [] = [
-                        'id' => $complaintAttachment->id ,
-                        'attachment' => url(Storage::url($complaintAttachment->attachment))
-                    ];
-                }
-
-                $complaint_det = [
-                    'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
-                    'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
-                    'location' => $complaint['location'],
-                    'problem_description' => $complaintVersion->problem_description ?? $complaint['problem_description'],
-                    'complaint_status' => ['id' => $complaintVersion->complaintStatus->id ?? $complaint->complaintStatus['id'] , 'status' => $complaintVersion->complaintStatus->status ?? $complaint->complaintStatus['status']],
-                    'attachments' => $attachments
-                ];
-
-             $message = 'complaint details are retrived succesfully';
-             return ['complaint' => $complaint_det , 'message' => $message];
-        }
+    // show complaint details
+    public function viewComplaintDetails($complaintId): array{
+        $complaint_det = $this->complaints->getComplaintDetails($complaintId);
+        $message = 'complaint details are retrived succesfully';
+        return ['complaint' => $complaint_det , 'message' => $message];
+    }
 
     //3 view all departments
-    
-public function getComplaintDepartment():array{
-        return $this->getComplaintDepartment();
-}
+    public function getComplaintDepartment():array{
+        return $this->getComplaintDepartments();
+    }
 
     //4 view all ComplaintType
-    public function getComplaintType():array{
-        $complaintTypes = ComplaintType::all();
-        foreach ($complaintTypes as $complaintType) {
-            $types [] = ['id' => $complaintType->id  , 'type' => $complaintType->type];
-        }
-        $message = 'all types are retrived successfully';
-
-        return ['gender' =>  $types , 'message' => $message];
-     }
-
+    public function getComplaintType(): array{
+        $types = $this->complaints->getComplaintTypes();
+        $message = 'all types are retrieved successfully';
+        return ['types'   => $types ,'message' => $message];
+    }
 
     //response additional information
     public function responsedToAdditionalInfo($request , $complaintId): array{
@@ -194,14 +152,13 @@ public function getComplaintDepartment():array{
         // Notification
             $employee = Employee::with('user')->find($additionalInfo->employee_id);
             if ($employee->user && $employee->user->fcm_token) {
-                (new FcmController())->sendFcmNotification(new Request([
-                    'user_id' => $employee->user->id,
-                    'title' => 'تم إضافة المعلومات المطلوبة'
-                ]));
+                    SendFcmNotificationJob::dispatch($employee->user->id, 'تم اضافة المعلومات المطلوبة');
             }
+
+        $this->complaints->clearComplaintDetailsCache($complaintId);
+        $this->complaints->clearUserComplaintsCache($complaint->user_id);
 
         $message = 'Additional information responsed successfully';
         return ['info_response' => $ss,'message' => $message];
     }
-
 }

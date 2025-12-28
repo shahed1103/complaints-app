@@ -24,27 +24,13 @@ use Illuminate\Support\Facades\Mail;
 use Throwable;
 use Storage;
 use Illuminate\Support\Facades\File;
+use App\Jobs\SendOtpEmailJob;
+use App\Jobs\SendWhatsappOtpJob;
+use App\Jobs\SendResetPasswordCodeJob;
 
 
 class UserService
 {
-    private function sendWhatsappOtpWithUltraMsg($phone , $otp){
-        $instance = env('ULTRA_MSG_INSTANCE');
-        $token = env('ULTRA_MSG_TOKEN');
-
-        $url = "https://api.ultramsg.com/instance151958/messages/chat";
-
-        $client = new \GuzzleHttp\Client();
-
-        $client->post($url, [
-            'form_params' => [
-                'token' => $token,
-                'to' => $phone,          
-                'body' => "رمز التحقق الخاص بك هو: $otp",
-            ]
-        ]);
-    }
-
     public function register($request): array{
         $clientRole = Role::query()->firstWhere('name', 'Client')->id;
 
@@ -80,12 +66,9 @@ class UserService
         ]);
 
         if ($phone) {
-            $this->sendWhatsappOtpWithUltraMsg($phone, $otp);
-            
+            SendWhatsappOtpJob::dispatch($phone, $otp);
         } else {
-            Mail::raw("Your OTP code is: $otp", function ($message) use ($email) {
-                $message->to($email)->subject('OTP Verification');
-        });
+            SendOtpEmailJob::dispatch($email, $otp);
         }
 
         $clientRole = Role::query()->where('name', 'Client')->first();
@@ -161,16 +144,6 @@ class UserService
     }
 
     public function resendOtp($userId){
-        // if (filter_var($request['emailOrPhone'], FILTER_VALIDATE_EMAIL)) {
-        //     $user = User::where('email', $request['emailOrPhone'])->first();
-        // } else{
-        //     $user = User::where('phone', $request['emailOrPhone'])->first();
-        // }
-
-        // if (is_null($user)) {
-        //     throw new Exception("هذا الحساب غير موجود.", 404);
-        // }
-
         $user = User::find($userId);
 
         if ($user->is_verified) {
@@ -184,11 +157,9 @@ class UserService
                     ]);
 
         if ($user->phone) {
-            $this->sendWhatsappOtpWithUltraMsg($user->phone, $otp);
+            SendWhatsappOtpJob::dispatch($user->phone, $otp);
         } else {
-            Mail::raw("رمز التحقق الخاص بك هو: $otp", function ($message) use ($user) {
-                $message->to($user->email)->subject("OTP Verification");
-            });
+            SendOtpEmailJob::dispatch($user->email, $otp);
         }
 
         $message = 'تم إرسال رمز تحقق جديد بنجاح.';
@@ -224,7 +195,7 @@ class UserService
                 $codeData = ResetCodePassword::query()->create($data);
 
                 //Send email to user
-                Mail::to($request['email'])->send(new SendCodeResetPassword($codeData['code']));
+                SendResetPasswordCodeJob::dispatch($request['email'], $data['code']);
 
                 $message = 'code sent';
                 $code = 200;
