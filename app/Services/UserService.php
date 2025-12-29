@@ -15,7 +15,9 @@ use App\Http\Requests\Auth\UserSigninRequest;
 use App\Http\Requests\Auth\UserSignupRequest;
 use App\Http\Requests\Auth\UserForgotPasswordRequest;
 use App\Http\Responses\Response;
-use Illuminate\Contracts\Validation\Validator;
+// use Illuminate\Contracts\Validation\Validator;
+// use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
 use App\Models\ResetCodePassword;
@@ -41,11 +43,28 @@ class UserService
         Storage::disk('public')->put($targetPath, File::get($sourcePath));
 
         if (filter_var($request['emailOrPhone'], FILTER_VALIDATE_EMAIL)) {
-                // $request->validate(['emailOrPhone' => 'email|unique:users,email']);
+
+            $validator = Validator::make(
+                ['email' => $request['emailOrPhone']],
+                ['email' => 'required|email|unique:users,email']
+            );
+
+            if ($validator->fails()) {
+                throw new Exception("The email or phone has already been taken.", 422 );
+            }
+
                 $email = $request['emailOrPhone'];
                 $phone = null;
         } elseif (preg_match('/^\+963[0-9]{9}$/', $request['emailOrPhone'])) {
-                // $request->validate(['emailOrPhone' => 'unique:users,phone']);
+            
+                $validator = Validator::make(
+                    ['phone' => $request['emailOrPhone']],
+                    ['phone' => 'required|unique:users,phone']
+                );
+
+                if ($validator->fails()) {
+                    throw new Exception("The email or phone has already been taken.", 422 );
+                }
                 $phone = $request['emailOrPhone'];
                 $email = null;
         } else {

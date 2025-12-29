@@ -35,8 +35,8 @@ class SendWhatsappOtpJob implements ShouldQueue
         $client->post($url, [
             'form_params' => [
                 'token' => $token,
-                'to' => $phone,          
-                'body' => "رمز التحقق الخاص بك هو: $otp",
+                'to' => $this->phone,          
+                'body' => "رمز التحقق الخاص بك هو: $this->otp",
             ]
         ]);
     }
