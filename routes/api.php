@@ -9,6 +9,7 @@ use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\FcmController;
 use App\Http\Controllers\PdfController;
 
+use App\Http\Controllers\ActivityLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,7 +84,7 @@ Route::middleware('auth:sanctum')->controller(ComplaintsController::class)->grou
     Route::post('responsedToAdditionalInfo/{complaintId}' , 'responsedToAdditionalInfo')
     ->name('user.responsed.To.Additional.Info')
     ->middleware('can:responsedToAdditionalInfo');
-    
+
 
 });
 
@@ -165,6 +166,11 @@ Route::get('getAllComplaintVersion/{id}' , 'getAllComplaintVersion')
 Route::controller(PdfController::class)->group(function () {
 Route::get('generateComplaintsPdf' , 'generateComplaintsPdf')
 ->name('admin.generateComplaintsPdf');
+});
+
+Route::controller(ActivityLogController::class)->group(function () {
+Route::get('index' , 'index')
+->name('admin.index');
 });
 
 
