@@ -41,11 +41,11 @@ class UserService
         Storage::disk('public')->put($targetPath, File::get($sourcePath));
 
         if (filter_var($request['emailOrPhone'], FILTER_VALIDATE_EMAIL)) {
-                $request->validate(['emailOrPhone' => 'email|unique:users,email']);
+                // $request->validate(['emailOrPhone' => 'email|unique:users,email']);
                 $email = $request['emailOrPhone'];
                 $phone = null;
         } elseif (preg_match('/^\+963[0-9]{9}$/', $request['emailOrPhone'])) {
-                $request->validate(['emailOrPhone' => 'unique:users,phone']);
+                // $request->validate(['emailOrPhone' => 'unique:users,phone']);
                 $phone = $request['emailOrPhone'];
                 $email = null;
         } else {

@@ -38,7 +38,7 @@ class UserSignupRequest extends FormRequest
 
         //Throw a ValidationException with the translated error messages
         $message = "you have sent invalid data";
-
-        throw new ValidationException($validator, Response::Validation([], $message , $validator->errors()));
+        $errors = $validator->errors()->all();
+        throw new ValidationException($validator, Response::Validation([], $message , $errors));
     }
 }

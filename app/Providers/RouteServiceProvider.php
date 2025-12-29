@@ -33,11 +33,11 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinutes(10, 5)
                 ->by(strtolower($request->input('emailOrPhone')).'|'.$request->ip())
                 ->response(function () {
-                    $data = null;
+                    $data = [];
                     $message = 'تم تجاوز عدد محاولات تسجيل الدخول المسموح بها. الرجاء المحاولة لاحقًا.';
 
                     $errors = [
-                        'throttle' => ['Too many login attempts']
+                        'Too many login attempts'
                     ];
                     $code = 429;
                     return Response::ErrorX($data, $message, $errors, $code);
