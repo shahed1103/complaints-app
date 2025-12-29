@@ -33,13 +33,8 @@ public function index() {
     });
 
     // إرجاع JSON مع معلومات الصفحة (pagination)
-    return response()->json([
-        'current_page' => $logs->currentPage(),
-        'per_page'     => $logs->perPage(),
-        'total'        => $logs->total(),
-        'last_page'    => $logs->lastPage(),
-        'data'         => $logsData,
-    ]);
+    return [  'data' => $logsData];
+
 }
 
 
