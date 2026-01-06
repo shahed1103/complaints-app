@@ -29,7 +29,7 @@ class ComplaintRepository implements ComplaintRepositoryInterface
             $version = $latestVersions[$complaint->id][0] ?? null;
 
             return [
-                'id' => $version->id ?? $complaint->id,
+                'id' => $complaint->id,
                 'complaint_type' => [
                     'id' => $complaint->complaintType->id,
                     'type' => $complaint->complaintType->type

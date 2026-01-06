@@ -159,6 +159,6 @@ class ComplaintService
         $this->complaints->clearUserComplaintsCache($complaint->user_id);
 
         $message = 'Additional information responsed successfully';
-        return ['info_response' => $ss,'message' => $message];
+        return ['info_response' => $complaint_version,'message' => $message];
     }
 }

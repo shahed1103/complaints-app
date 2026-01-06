@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ComplaintVersion extends Model
 {
 
-    use LogsActivity;
+    // use LogsActivity;
         protected $fillable = [
         'complaint_type_id',
         'user_id',

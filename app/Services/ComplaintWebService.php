@@ -74,6 +74,8 @@ class ComplaintWebService
                                             ->first();
         $complaint->lock($employeeId);
         $attachments = [] ;
+        $notes = [] ;
+
             $attachmentsQuery = ComplaintAttachment::where('complaint_id', $complaintId);
 
             if ($latestVersion) {
@@ -90,6 +92,14 @@ class ComplaintWebService
                 ];
             })->toArray();
 
+            $notes = ComplaintVersion::where('complaint_id', $complaint->id)
+                ->orderBy('id') 
+                ->pluck('note')
+                ->filter()      
+                ->values()
+                ->toArray();
+
+
         $complaint_det = [
             'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
             'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
@@ -98,7 +108,7 @@ class ComplaintWebService
             'complaint_status' => ['id' => $latestVersion->complaintStatus['id'] ?? $complaint->complaintStatus['id'] ,
                                    'status' => $latestVersion->complaintStatus['status'] ?? $complaint->complaintStatus['status']],
             'attachments' => $attachments,
-            'notes' => $latestVersion->note
+            'notes' => $notes
 
         ];
 
@@ -304,7 +314,7 @@ class ComplaintWebService
 
             $message = 'complaints for spicific departmemt are retrived succesfully';
             return ['complaints' => $complaint_det , 'message' => $message];
-    }//edit//done//expirment in postman
+    }//edit//done
 
     public function addNewEmployee($request): array{
         $employee = User::factory()->create([
