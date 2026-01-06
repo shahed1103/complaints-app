@@ -10,6 +10,7 @@ use App\Models\Employee;
 use App\Models\ComplaintVersion;
 use App\Models\ComplaintType;
 use App\Models\ComplaintStatus;
+use App\Models\ComplaintAttachment;
 use App\Models\ComplaintDepartment;
 use App\Models\Note;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -42,47 +43,68 @@ class ComplaintWebService
         $complaint_det = [];
 
         foreach ($complaints as $complaint) {
+
+        $latestVersion = ComplaintVersion::with('complaintStatus:id,status')            
+                                            ->where('complaint_id', $complaint->id)
+                                            ->latest('id')
+                                            ->first();
+
+
             $complaint_det [] = [
                 'id' => $complaint['id'],
                 'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
                 'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
                 'location' => $complaint['location'],
-                'complaint_status' => ['id' => $complaint->complaintStatus['id'] , 'status' => $complaint->complaintStatus['status']],
+                'complaint_status' => ['id' => $latestVersion->complaintStatus['id'] ?? $complaint->complaintStatus['id'] ,
+                                       'status' => $latestVersion->complaintStatus['status'] ?? $complaint->complaintStatus['status']],
             ];
         }
 
                 $message = 'complaints for spicific employee departmemt are retrived succesfully';
                 return ['complaints' => $complaint_det , 'message' => $message];
-    }
+    }//edit///done
 
     // show complaint details for spicific employee departmemt
     public function viewComplaintDetailsEmployeeDepartmemt($complaintId): array{
         $complaint =  Complaint::with('complaintType' , 'complaintDepartment' , 'complaintStatus' , 'complaintAttachments')->find($complaintId);
         $employeeId = Employee::where('user_id', Auth::id())->value('id');
-
+        $latestVersion = ComplaintVersion::with('complaintStatus:id,status')            
+                                            ->where('complaint_id', $complaint->id)
+                                            ->latest('id')
+                                            ->first();
         $complaint->lock($employeeId);
-
         $attachments = [] ;
+            $attachmentsQuery = ComplaintAttachment::where('complaint_id', $complaintId);
 
-            foreach ($complaint->complaintAttachments as $complaintAttachment) {
-                $attachments [] = [
-                    'id' => $complaintAttachment->id ,
-                        'attachment' => url(Storage::url($complaintAttachment->attachment))
-                    ];
-                }
+            if ($latestVersion) {
+                $attachmentsQuery->where(function ($q) use ($latestVersion) {
+                    $q->whereNull('complaint_version_id')
+                    ->orWhere('complaint_version_id', '<=', $latestVersion->id);
+                });
+            }
+
+            $attachments = $attachmentsQuery->get()->map(function ($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'attachment' => url(Storage::url($attachment->attachment)),
+                ];
+            })->toArray();
 
         $complaint_det = [
             'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
             'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
             'location' => $complaint['location'],
-            'problem_description' => $complaint['problem_description'],
-            'complaint_status' => ['id' => $complaint->complaintStatus['id'] , 'status' => $complaint->complaintStatus['status']],
-            'attachments' => $attachments
+            'problem_description' => $latestVersion->problem_description ?? $complaint['problem_description'],
+            'complaint_status' => ['id' => $latestVersion->complaintStatus['id'] ?? $complaint->complaintStatus['id'] ,
+                                   'status' => $latestVersion->complaintStatus['status'] ?? $complaint->complaintStatus['status']],
+            'attachments' => $attachments,
+            'notes' => $latestVersion->note
+
         ];
 
             $message = 'complaint details for spicific employee departmemt are retrived succesfully';
             return ['complaint' => $complaint_det , 'message' => $message];
-    }
+    }//edit//done//question about notes
 
     // edit complaint status
     public function editComplaintStatus($request , $complaintId): array{
@@ -266,18 +288,23 @@ class ComplaintWebService
 
 
         foreach ($complaints as $complaint) {
+
+        $latestVersion = ComplaintVersion::with('complaintStatus:id,status')            
+                                            ->where('complaint_id', $complaint->id)
+                                            ->latest('id')
+                                            ->first();
             $complaint_det [] = [
                 'id' => $complaint['id'],
                 'complaint_type' => ['id' => $complaint->complaintType['id'] , 'type' => $complaint->complaintType['type']],
                 'complaint_department' => ['id' => $complaint->complaintDepartment['id'] , 'department_name' => $complaint->complaintDepartment['department_name']],
                 'location' => $complaint['location'],
-                'complaint_status' => ['id' => $complaint->complaintStatus['id'] , 'status' => $complaint->complaintStatus['status']],
-            ];
+                'complaint_status' => ['id' => $latestVersion->complaintStatus['id'] ?? $complaint->complaintStatus['id'] ,
+                                       'status' => $latestVersion->complaintStatus['status'] ?? $complaint->complaintStatus['status']],            ];
         }
 
             $message = 'complaints for spicific departmemt are retrived succesfully';
             return ['complaints' => $complaint_det , 'message' => $message];
-    }
+    }//edit//done
 
     public function addNewEmployee($request): array{
         $employee = User::factory()->create([
