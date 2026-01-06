@@ -114,7 +114,7 @@ class ComplaintWebService
 
             $message = 'complaint details for spicific employee departmemt are retrived succesfully';
             return ['complaint' => $complaint_det , 'message' => $message];
-    }//edit//done//question about notes
+    }//edit//done
 
     // edit complaint status
     public function editComplaintStatus($request , $complaintId): array{
