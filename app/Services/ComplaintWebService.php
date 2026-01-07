@@ -453,13 +453,13 @@ class ComplaintWebService
 
     public function getAllComplaintVersion($complaint_id):array{
         $versions= ComplaintVersion::where('complaint_id' ,$complaint_id )->get();
-        $version_det =[];
+        $version_det = [];
         foreach ($versions as $version) {
         $complaintType= ComplaintType::where('id',$version->complaint_type_id)->value('type');
         $complaintDepartment= ComplaintDepartment::where('id',$version->complaint_department_id)->value('department_name');
         $complaintStatus= ComplaintStatus::where('id',$version->complaint_status_id)->value('status');
 
-            $version_det  = [
+            $version_det [] = [
                 'id' => $version['id'],
                 'complaint_id' =>$version['complaint_id'],
                 'complaint_type' => $complaintType,
