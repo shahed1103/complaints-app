@@ -9,7 +9,6 @@ use App\Services\ComplaintWebService;
 use App\Http\Requests\Complaint\EditComplaintStatusRequest;
 use App\Http\Requests\Complaint\AdditionalInfoRequest;
 use App\Http\Requests\Super\AddNewEmployeeRequest;
-
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Throwable;

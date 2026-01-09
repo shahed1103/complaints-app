@@ -17,7 +17,6 @@ class ActivityLogController extends Controller
 public function index() {
     // جلب أحدث 10 سجلات
     $logs = ActivityLog::latest()->paginate(10);
-
     // تعديل البيانات لتكون بالشكل المطلوب في JSON
     $logsData = $logs->map(function($log) {
         return [
