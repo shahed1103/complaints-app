@@ -13,7 +13,8 @@ class ComplaintTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        $status = ['طلب تسجيل' , 'خطأ فاتورة' , 'عطل فني'];
+        // $status = ['طلب تسجيل' , 'خطأ فاتورة' , 'عطل فني'];
+        $status = ['Registration Request', 'Invoice Error', 'Technical Malfunction'];
 
         for ($i=0; $i < 3 ; $i++) {
             ComplaintType::query()->create([
