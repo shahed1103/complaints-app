@@ -159,7 +159,8 @@ class ComplaintWebService
             $user = User::find($result['user_id']);
             if ($user && $user->fcm_token) {
                     $status = $result['newversion']->complaintStatus->status;
-                    SendFcmNotificationJob::dispatch($user->id, 'تم تعديل حالة شكواك' , "رقم الشكوى : $complaintId \n حالة الشكوى : $status");
+                    // SendFcmNotificationJob::dispatch($user->id, 'تم تعديل حالة شكواك' , "رقم الشكوى : $complaintId \n حالة الشكوى : $status");
+                    SendFcmNotificationJob::dispatch($user->id, 'Your complaint status has been updated', "Complaint number: $complaintId \n Complaint status: $status");
             }
 
         $this->complaints->clearComplaintDetailsCache($complaintId);
@@ -278,7 +279,9 @@ class ComplaintWebService
             $complaintUser = User::find($result['user_id']);
 
             if ($complaintUser && $complaintUser->fcm_token) {
-                SendFcmNotificationJob::dispatch($complaintUser->id, 'تم طلب معلومات إضافية بخصوص شكواك' , "رقم الشكوى : $complaintId \n تاريخ الطلب : {$result['infoRequest']->requested_at}");
+                // SendFcmNotificationJob::dispatch($complaintUser->id, 'تم طلب معلومات إضافية بخصوص شكواك' , "رقم الشكوى : $complaintId \n تاريخ الطلب : {$result['infoRequest']->requested_at}");
+                SendFcmNotificationJob::dispatch($complaintUser->id, 'Additional information has been requested regarding your complaint', "Complaint number: $complaintId \n Request date: {$result['infoRequest']->requested_at}");
+
             }
 
             $message = 'Additional information requested successfully';

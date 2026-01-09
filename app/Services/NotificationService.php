@@ -16,8 +16,7 @@ class NotificationService
 {
 
 
-public function getUserNotifications($userId)
-{
+public function getUserNotifications($userId){
    Notification::where('user_id', $userId)
         ->where('read_at', false)
         ->update(['read_at' => true]);
@@ -31,8 +30,7 @@ public function getUserNotifications($userId)
     return ['notifications' => $notifications  , 'message' => $message];
 }
 
-    public function getUnreadCount($userId)
-    {
+public function getUnreadCount($userId){
         $count = Notification::where('user_id', $userId)
             ->where('read_at', false)
             ->count();
