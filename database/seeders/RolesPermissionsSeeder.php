@@ -43,6 +43,7 @@ class RolesPermissionsSeeder extends Seeder
         $EmployeeRole->syncPermissions(['viewComplaintsEmployeeDepartmemt' , 'viewComplaintDetailsEmployeeDepartmemt' ,
                                         'editComplaintStatus' , 'addNotesAboutComplaint' , 'requestAdditionalInfo']);
 
+// $url = asset('storage/' . $image->filename);
 
 $sourcePath = public_path('uploads/seeder_photos/defualtProfilePhoto.png');
 $targetPath = 'uploads/det/defualtProfilePhoto.png';
